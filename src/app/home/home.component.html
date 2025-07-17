@@ -1,0 +1,183 @@
+<app-navbar></app-navbar>
+
+<div class="container-fluid py-3">
+  <!-- Stat Boxes Row -->
+  <div class="row">
+    <div class="col-6 col-md-4 col-lg-2 mb-3">
+      <div class="stat-box bg-devis h-100">
+        <h3>Devis <span class="badge bg-light text-dark ms-1">3</span></h3>
+        <p>Dépasser 3 | Maintien Aujourd'hui Rest.</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2 mb-3">
+      <div class="stat-box bg-non-vendu h-100">
+        <h3>Non Vendu <span class="badge bg-light text-dark ms-1">39</span></h3>
+        <p>Dépasser 27 | Maintien 1 | Aujourd'hui Rest 11</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2 mb-3">
+      <div class="stat-box bg-en-attente h-100">
+        <h3>En Attente <span class="badge bg-light text-dark ms-1">10</span></h3>
+        <p>Envoyer 10 | Copier Imméd 2 | Réserv 8</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2 mb-3">
+      <div class="stat-box bg-en-cours h-100">
+        <h3>En Cours <span class="badge bg-light text-dark ms-1">99</span></h3>
+        <p>App 40 | Soc 59 | À régler 84</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2 mb-3">
+      <div class="stat-box bg-terminee h-100">
+        <h3>Terminée <span class="badge bg-light text-dark ms-1">77</span></h3>
+        <p>App 27 | Soc 50</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2 mb-3">
+      <div class="stat-box bg-annulee h-100">
+        <h3>Annulée <span class="badge bg-light text-dark ms-1">67</span></h3>
+        <p>Imméd 56 | Réserv 11</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs and Create Button Container -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <ul class="nav nav-tabs" id="courseTabs" role="tablist" style="margin-bottom: -1px;">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#devis" type="button" role="tab"><i class="fas fa-file-invoice-dollar"></i> Devis</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#non-vendu" type="button" role="tab"><i class="fas fa-times-circle"></i> Non Vendu</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#en-attente" type="button" role="tab"><i class="fas fa-clock"></i> En Attente</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#en-cours" type="button" role="tab"><i class="fas fa-running"></i> En Cours</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#terminee" type="button" role="tab"><i class="fas fa-check-circle"></i> Terminée</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#annulee" type="button" role="tab"><i class="fas fa-ban"></i> Annulée</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#archivee" type="button" role="tab"><i class="fas fa-archive"></i> Archivée</button>
+      </li>
+    </ul>
+    <!-- NEW: Create Course Button -->
+    <a class="btn btn-success" [routerLink]="['/createtrip']">
+        <i class="fas fa-plus me-2"></i>Créer une course
+    </a>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content" id="courseTabsContent">
+    <div class="tab-pane fade show active" id="en-attente" role="tabpanel">
+      <div class="card card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Courses en Attente <i class="fas fa-sync-alt ms-2"></i></h4>
+          <form class="d-flex search-form" (submit)="onSearch()">
+            <input class="form-control me-2" type="search" placeholder="Rechercher une course..." aria-label="Search" [(ngModel)]="searchTerm" (input)="onSearch()" name="search">
+            <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
+          </form>
+        </div>
+
+        <div *ngIf="isLoading" class="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Action</th>
+                <th (click)="sortTrips('date')">Date <i class="fas" [ngClass]="getSortIcon('date')"></i></th>
+                <th (click)="sortTrips('type')">Type <i class="fas" [ngClass]="getSortIcon('type')"></i></th>
+                <th (click)="sortTrips('etat')">État <i class="fas" [ngClass]="getSortIcon('etat')"></i></th>
+                <th (click)="sortTrips('dispatcher')">Dispatchor <i class="fas" [ngClass]="getSortIcon('dispatcher')"></i></th>
+                <th (click)="sortTrips('de')">De <i class="fas" [ngClass]="getSortIcon('de')"></i></th>
+                <th (click)="sortTrips('a')">À <i class="fas" [ngClass]="getSortIcon('a')"></i></th>
+                <th (click)="sortTrips('num')">Num <i class="fas" [ngClass]="getSortIcon('num')"></i></th>
+                <th (click)="sortTrips('prix')">Prix <i class="fas" [ngClass]="getSortIcon('prix')"></i></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="filteredTrips.length === 0">
+                <td colspan="9">Aucune course trouvée.</td>
+              </tr>
+              <tr *ngFor="let trip of filteredTrips; let i = index">
+                <td class="table-actions">
+                  <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="openModal(trip)"><i class="fas fa-eye"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" title="Annuler"><i class="fas fa-times"></i></button>
+                  <button class="btn btn-sm btn-outline-success" title="Modifier" [routerLink]="['/trips/edit', trip.id]">
+                    <i class="fas fa-pencil-alt"></i>
+                  </button>
+                </td>
+                <td>
+                  {{ trip.date | date:'HH:mm' }}<br>
+                  <strong>{{ trip.date | date:'dd/MM/yyyy' }}</strong><br>
+                  <span class="badge bg-warning text-dark alert-custom">en attente</span>
+                </td>
+                <td>
+                  {{ i + 1 }}/{{ allTrips.length }}<br>
+                  <span class="badge bg-info text-dark alert-custom">{{ trip.alleretour ? 'Aller-retour' : 'Aller simple' }}</span>
+                </td>
+                <td>
+                  {{ trip.date | date:'HH:mm dd/MM/yyyy' }}<br>
+                  <span class="badge bg-info">réservation</span>
+                </td>
+                <td>
+                  {{ trip.dispatcherId || 'R' + (100 + i) }}<br>
+                  <button class="btn btn-sm je-gere-btn">Je gère</button>
+                </td>
+                <td>{{ trip.from }}</td>
+                <td>{{ trip.destination }}</td>
+                <td>{{ trip.telephone }}</td>
+                <td>{{ trip.prix ? (trip.prix | currency:'EUR') : 'N/A' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="devis" role="tabpanel"><div class="card card-body">Devis content goes here.</div></div>
+    <div class="tab-pane fade" id="non-vendu" role="tabpanel"><div class="card card-body">Non Vendu content goes here.</div></div>
+    <div class="tab-pane fade" id="en-cours" role="tabpanel"><div class="card card-body">En cours content goes here.</div></div>
+    <div class="tab-pane fade" id="terminee" role="tabpanel"><div class="card card-body">Terminée content goes here.</div></div>
+    <div class="tab-pane fade" id="annulee" role="tabpanel"><div class="card card-body">Annulée content goes here.</div></div>
+    <div class="tab-pane fade" id="archivee" role="tabpanel"><div class="card card-body">Archivée content goes here.</div></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="courseDetailsModal" #courseDetailsModal tabindex="-1" aria-labelledby="courseDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content" *ngIf="selectedTrip">
+        <div class="modal-header">
+          <h5 class="modal-title" id="courseDetailsModalLabel">Détails de la course</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="container-fluid">
+              <dl class="row">
+                <div class="col-md-6">
+                  <dt class="col-sm-4">Départ</dt><dd class="col-sm-8">{{ selectedTrip.from }}</dd>
+                  <dt class="col-sm-4">Arrivée</dt><dd class="col-sm-8">{{ selectedTrip.destination }}</dd>
+                  <dt class="col-sm-4">Date</dt><dd class="col-sm-8">{{ selectedTrip.date | date:'dd/MM/yyyy HH:mm' }}</dd>
+                  <dt class="col-sm-4">N° de téléphone</dt><dd class="col-sm-8">{{ selectedTrip.telephone }}</dd>
+                </div>
+                <div class="col-md-6">
+                  <dt class="col-sm-4">Prix annoncé</dt><dd class="col-sm-8">{{ selectedTrip.prix | currency:'EUR' }}</dd>
+                  <dt class="col-sm-4">Mission</dt><dd class="col-sm-8">ref-{{selectedTrip.id}}</dd>
+                  <dt class="col-sm-4">Dispatcher</dt><dd class="col-sm-8">{{ selectedTrip.dispatcherId }}</dd>
+                </div>
+              </dl>
+              </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+          <button type="button" class="btn btn-primary" (click)="saveChanges()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

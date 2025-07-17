@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CourseSync</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #6b7280;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --card-bg: #fff;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #60a5fa;
+            --secondary-color: #9ca3af;
+            --background-color: #1f2937;
+            --text-color: #e5e7eb;
+            --card-bg: #374151;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="high-contrast"] {
+            --primary-color: #00f;
+            --secondary-color: #fff;
+            --background-color: #000;
+            --text-color: #fff;
+            --card-bg: #000;
+            --shadow: 0 0 0 1px #fff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            transition: var(--transition);
+            margin: 0;
+        }
+
+        /* Navbar */
+        .main-nav {
+            background: linear-gradient(90deg, #1e293b 0%, #475569 100%);
+            box-shadow: var(--shadow);
+            padding: 0.75rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .main-nav .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #fff !important;
+        }
+        .main-nav .nav-link {
+            color: #e2e8f0;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .main-nav .nav-link:hover,
+        .main-nav .nav-link.active {
+            color: var(--primary-color);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .main-nav .nav-link i {
+            margin-right: 0.5rem;
+        }
+
+        /* Theme Toggles */
+        .theme-toggle, .contrast-toggle {
+            color: #e2e8f0;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .theme-toggle:hover, .contrast-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.25rem;
+            transition: var(--transition);
+        }
+        .filter-bar.collapsed {
+            height: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .filter-bar .input-group {
+            border-radius: 8px;
+        }
+        .filter-bar .form-control, .filter-bar .form-select {
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .filter-bar .form-control:focus, .filter-bar .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .filter-bar .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .filter-bar .btn-primary:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+        .filter-bar .btn-secondary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        .filter-bar .btn-secondary:hover {
+            background-color: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        /* History Sidebar */
+        .history-sidebar {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            max-height: 600px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+        .history-sidebar.collapsed {
+            transform: translateX(-100%);
+            opacity: 0;
+            visibility: hidden;
+        }
+        .history-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .history-sidebar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        .history-sidebar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .history-sidebar h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 1.25rem;
+        }
+        .history-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .history-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .history-item:hover {
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            padding: 0.5rem 0.5rem 0.5rem 30px;
+            transform: scale(1.02);
+        }
+        .history-item::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+        }
+        .history-item::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 15px;
+            width: 2px;
+            height: calc(100% - 15px);
+            background: #e5e7eb;
+        }
+        .history-item:last-child::after {
+            display: none;
+        }
+        .history-item p {
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        .history-item .text-muted {
+            font-size: 0.85rem;
+        }
+        .history-item .badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        /* Main Content Area */
+        .content-area {
+            background: var(--card-bg);
+            padding: 1.75rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .content-area .sticky-header {
+            position: sticky;
+            top: 70px;
+            background: var(--card-bg);
+            z-index: 10;
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .content-area .nav-tabs {
+            border-bottom: none;
+        }
+        .content-area .nav-link {
+            color: var(--secondary-color);
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        .content-area .nav-link:hover {
+            color: var(--primary-color);
+            background-color: #f1f5f9;
+        }
+        .content-area .nav-link.active {
+            color: var(--primary-color);
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            border-bottom: none;
+        }
+        .content-area .btn {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .content-area .btn:hover {
+            transform: translateY(-1px);
+        }
+        .content-area .btn-danger {
+            background-color: #ef4444;
+            border: none;
+        }
+        .content-area .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .content-area .btn-info {
+            background-color: #06b6d4;
+            border: none;
+        }
+        .content-area .btn-info:hover {
+            background-color: #0891b2;
+        }
+        .content-area .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+        }
+        .content-area .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .content-area .btn-secondary {
+            background-color: var(--secondary-color);
+            border: none;
+        }
+        .content-area .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: none;
+            font-size: 0.9rem;
+            background-color: var(--card-bg);
+        }
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            color: var(--text-color);
+        }
+        .dropdown-item:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
+        /* Form Elements */
+        .content-area .form-select {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .content-area .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .content-area .form-check-label {
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 1rem;
+        }
+        .progress-container .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e5e7eb;
+        }
+        .progress-container .progress-bar {
+            background-color: var(--primary-color);
+        }
+
+        /* Info Cards */
+        .info-card {
+            background-color: var(--card-bg);
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            transition: var(--transition);
+        }
+        .info-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        .info-card-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .info-card-header i {
+            color: var(--secondary-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .info-card-header i:hover {
+            color: var(--primary-color);
+        }
+        dl {
+            margin-bottom: 0;
+        }
+        dt {
+            font-weight: 500;
+            color: var(--secondary-color);
+            float: left;
+            width: 120px;
+            clear: left;
+            font-size: 0.9rem;
+        }
+        dd {
+            font-weight: 600;
+            margin-left: 130px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        /* Map */
+        #map {
+            height: 300px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+        .toast {
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .filter-bar {
+                padding: 1rem;
+            }
+            .filter-bar-toggle {
+                display: block;
+                margin-bottom: 1rem;
+            }
+            .history-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 80%;
+                height: 100%;
+                z-index: 2000;
+                padding: 1rem;
+                max-height: none;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease, opacity 0.3s ease;
+            }
+            .history-sidebar.active {
+                transform: translateX(0);
+                opacity: 1;
+                visibility: visible;
+            }
+            .history-sidebar h5 {
+                font-size: 1.1rem;
+            }
+            .history-item {
+                padding-left: 25px;
+                margin-bottom: 1rem;
+            }
+            .content-area {
+                padding: 1.25rem;
+            }
+            .info-card {
+                padding: 1rem;
+            }
+            .info-card-header {
+                font-size: 1rem;
+            }
+            dt {
+                width: 100px;
+                font-size: 0.85rem;
+            }
+            dd {
+                margin-left: 110px;
+                font-size: 0.85rem;
+            }
+            .history-toggle {
+                display: block;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-nav .navbar-brand {
+                font-size: 1.2rem;
+            }
+            .main-nav .nav-link {
+                font-size: 0.85rem;
+                padding: 0.4rem 0.8rem;
+            }
+            .filter-bar .form-control, .filter-bar .form-select {
+                font-size: 0.85rem;
+            }
+            .filter-bar .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            #map {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark main-nav" role="navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">CourseSync</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" aria-label="Accueil"><i class="fas fa-home"></i> Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" aria-label="Mes Courses"><i class="fas fa-calendar-alt"></i> Mes Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" aria-label="Chauffeurs"><i class="fas fa-users"></i> Chauffeurs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" aria-label="Recherche"><i class="fas fa-search"></i> Recherche</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" aria-label="Outils"><i class="fas fa-tools"></i> Outils</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" aria-label="Toutes Courses"><i class="fas fa-route"></i> Toutes Courses</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button class="theme-toggle" aria-label="Toggle dark mode">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="contrast-toggle" aria-label="Toggle high-contrast mode">
+                            <i class="fas fa-adjust"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" aria-label="Profil"><i class="fas fa-user-circle"></i> Profil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" aria-label="Déconnexion"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4" role="main">
+        <button class="btn btn-primary filter-bar-toggle d-md-none mb-3" title="Afficher/Masquer les filtres" aria-label="Afficher/Masquer les filtres"><i class="fas fa-filter"></i> Filtres</button>
+        <div class="filter-bar">
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <button class="btn btn-secondary" title="Réinitialiser les filtres" aria-label="Réinitialiser les filtres"><i class="fas fa-undo"></i></button>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" value="persUxdgo8eeeys56iPb" placeholder="Rechercher par ID" aria-label="Rechercher par ID" aria-describedby="search-id">
+                        <button class="btn btn-primary" type="button" title="Rechercher" aria-label="Rechercher"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-taxi"></i></span>
+                        <input type="text" class="form-control" placeholder="Référence de course" aria-label="Référence de course" aria-describedby="search-ref">
+                        <button class="btn btn-primary" type="button" title="Rechercher" aria-label="Rechercher"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        <input type="date" class="form-control" placeholder="Date de course" aria-label="Date de course" aria-describedby="search-date">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" aria-label="Filtrer par statut" aria-describedby="filter-status">
+                        <option value="">Tous les statuts</option>
+                        <option value="en-attente">En attente</option>
+                        <option value="en-cours">En cours</option>
+                        <option value="terminee">Terminée</option>
+                        <option value="annulee">Annulée</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3" role="complementary">
+                <button class="btn btn-primary history-toggle d-md-none mb-3" title="Afficher/Masquer l'historique" aria-label="Afficher/Masquer l'historique"><i class="fas fa-history"></i> Historique</button>
+                <div class="history-sidebar" aria-label="Historique des courses">
+                    <h5>Historique de Course</h5>
+                    <hr>
+                    <div class="history-item" role="button" tabindex="0" aria-label="Historique du 2025-07-06 22:07:57">
+                        <p class="mb-0 text-muted">2025-07-06 22:07:57</p>
+                        <p class="mb-1">Création <span class="badge bg-success">r113 envoyé</span></p>
+                        <small class="text-muted">Frais 12€22 <span class="badge bg-warning text-dark">en attente</span></small>
+                    </div>
+                    <div class="history-item" role="button" tabindex="0" aria-label="Historique du 2025-07-06 22:09:44">
+                        <p class="mb-0 text-muted">2025-07-06 22:09:44</p>
+                        <p class="mb-1">Stop course après 1 minute 39 secondes <span class="badge bg-success">r113</span></p>
+                        <small class="text-muted">Frais 12€10 <span class="badge bg-warning text-dark">en attente</span></small>
+                    </div>
+                    <div class="history-item" role="button" tabindex="0" aria-label="Historique du 2025-07-06 21:45:12">
+                        <p class="mb-0 text-muted">2025-07-06 21:45:12</p>
+                        <p class="mb-1">Assignation chauffeur <span class="badge bg-info">r113 assigné</span></p>
+                        <small class="text-muted">Chauffeur: Toumani Traore <span class="badge bg-primary">en cours</span></small>
+                    </div>
+                    <div class="history-item" role="button" tabindex="0" aria-label="Historique du 2025-07-06 20:30:25">
+                        <p class="mb-0 text-muted">2025-07-06 20:30:25</p>
+                        <p class="mb-1">Demande de course <span class="badge bg-secondary">r112 soumis</span></p>
+                        <small class="text-muted">Frais estimés 15€50 <span class="badge bg-warning text-dark">en attente</span></small>
+                    </div>
+                    <div class="history-item" role="button" tabindex="0" aria-label="Historique du 2025-07-05 18:15:33">
+                        <p class="mb-0 text-muted">2025-07-05 18:15:33</p>
+                        <p class="mb-1">Course terminée <span class="badge bg-success">r111 complété</span></p>
+                        <small class="text-muted">Frais 10€75 <span class="badge bg-success">terminée</span></small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="content-area">
+                    <div class="sticky-header">
+                        <div class="row align-items-center mb-4">
+                            <div class="col-md-3">
+                                <label for="affecter-select" class="form-label">Affecter</label>
+                                <select class="form-select" id="affecter-select" aria-label="Affecter à un chauffeur" aria-describedby="assign-driver">
+                                    <option value="">Sélectionner un chauffeur</option>
+                                    <option value="toumani">Toumani Traore</option>
+                                    <option value="amina">Amina Diallo</option>
+                                    <option value="jean">Jean Dupont</option>
+                                </select>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="smsCheck1" aria-label="Envoyer SMS de confirmation">
+                                    <label class="form-check-label" for="smsCheck1">Envoyer SMS</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-info text-white mt-4" title="Envoyer via Telegram" aria-label="Envoyer via Telegram"><i class="fab fa-telegram"></i> Telegram</button>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="affecter-a-select" class="form-label">Affecter à</label>
+                                <select class="form-select" id="affecter-a-select" aria-label="Affecter à une société" aria-describedby="assign-company">
+                                    <option value="">Sélectionner une société</option>
+                                    <option value="goodcab">Good Cab</option>
+                                    <option value="fasttrack">Fast Track</option>
+                                </select>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="smsCheck2" aria-label="Envoyer SMS de confirmation">
+                                    <label class="form-check-label" for="smsCheck2">Envoyer SMS</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary mt-4" title="Envoyer via Application" aria-label="Envoyer via Application"><i class="fab fa-apple"></i> Application</button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                            <ul class="nav nav-tabs border-0">
+                                <li class="nav-item"><a href="#" class="nav-link active" aria-label="Confirmation de banque">Confirmation de banque</a></li>
+                                <li class="nav-item"><a href="#" class="nav-link" aria-label="Facture de chauffeur"><i class="fas fa-file-invoice"></i> Facture de chauffeur</a></li>
+                            </ul>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-danger" title="Arrêter la course" aria-label="Arrêter la course">Stop</button>
+                                <button class="btn btn-secondary" title="Copier les détails" aria-label="Copier les détails">Copier</button>
+                                <button class="btn btn-secondary" title="Voir les détails" aria-label="Voir les détails">Détails</button>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Actions supplémentaires" aria-label="Actions supplémentaires">Action</button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                        <li><a class="dropdown-item" href="#">Archiver</a></li>
+                                        <li><a class="dropdown-item" href="#">Supprimer</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <strong>Application</strong>
+                            <p class="text-danger">Non payée</p>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>SOC</strong>
+                            <p class="text-danger">Non payée</p>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Paypal</strong>
+                            <p>-</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h6 class="info-card-header">Client <i class="fas fa-edit" aria-label="Modifier les informations du client"></i></h6>
+                                <dl>
+                                    <dt>Nom de client</dt><dd>Inconnu</dd>
+                                    <dt>N° tel</dt><dd>+33612345678</dd>
+                                    <dt>N° pax</dt><dd>1</dd>
+                                    <dt>Commentaire</dt><dd>Préférer un véhicule électrique</dd>
+                                    <dt>Email</dt><dd>inconnu[at]example.com</dd>
+                                    <dt>Préférence</dt><dd>Siège bébé requis</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h6 class="info-card-header">Course <i class="fas fa-edit" aria-label="Modifier les informations de la course"></i> <span class="float-end fw-normal">Ville: Lyon</span></h6>
+                                <div class="progress-container">
+                                    <div class="progress" role="progressbar" aria-label="Ride progress" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar" style="width: 75%"></div>
+                                    </div>
+                                    <small class="text-muted">Course en cours (3/4 étapes)</small>
+                                </div>
+                                <div id="map"></div>
+                                <dl>
+                                    <dt>État</dt><dd>Immédiate</dd>
+                                    <dt>Type</dt><dd>Arrêté</dd>
+                                    <dt>Date C</dt><dd>22:07 06/07/2025</dd>
+                                    <dt>R</dt><dd>22:07 06/07/2025</dd>
+                                    <dt>Date de retour</dt><dd>-</dd>
+                                    <dt>De</dt><dd>118 Rue Marietton, 69130 Écully, France</dd>
+                                    <dt>À</dt><dd>28 Rue de la Bannière, 69003 Lyon, France</dd>
+                                    <dt>Distance</dt><dd>7 Km</dd>
+                                    <dt>Durée estimée</dt><dd>15 min</dd>
+                                    <dt>Véhicule</dt><dd>Tesla Model 3</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h6 class="info-card-header">Référence <i class="fas fa-ellipsis-h" aria-label="Plus d'options"></i></h6>
+                        <dl>
+                            <dt>Référence ID</dt><dd>persUxdgo8eeeys56iPb</dd>
+                            <dt>Chauffeur</dt><dd>Toumani Traore</dd>
+                            <dt>Société</dt><dd>Good Cab</dd>
+                            <dt>Paiement</dt><dd>En attente</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container">
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        // Initialize tooltips
+        document.querySelectorAll('.btn').forEach(button => {
+            new bootstrap.Tooltip(button);
+        });
+
+        // Theme toggles
+        const themeToggle = document.querySelector('.theme-toggle');
+        const contrastToggle = document.querySelector('.contrast-toggle');
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'high-contrast') return;
+            document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+            themeToggle.innerHTML = `<i class="fas fa-${currentTheme === 'dark' ? 'moon' : 'sun'}"></i>`;
+            showToast('Mode ' + (currentTheme === 'dark' ? 'clair' : 'sombre') + ' activé');
+        });
+        contrastToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', currentTheme === 'high-contrast' ? 'light' : 'high-contrast');
+            contrastToggle.innerHTML = `<i class="fas fa-${currentTheme === 'high-contrast' ? 'adjust' : 'circle-half-stroke'}"></i>`;
+            showToast('Mode ' + (currentTheme === 'high-contrast' ? 'normal' : 'haut contraste') + ' activé');
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                if (targetId && targetId !== '#') {
+                    document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // History item interactivity with keyboard support
+        document.querySelectorAll('.history-item').forEach(item => {
+            item.addEventListener('click', () => {
+                showToast('Détails de l\'historique: ' + item.querySelector('p').textContent);
+            });
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    showToast('Détails de l\'historique: ' + item.querySelector('p').textContent);
+                }
+            });
+        });
+
+        // Toggle history sidebar on mobile
+        const historyToggle = document.querySelector('.history-toggle');
+        const sidebar = document.querySelector('.history-sidebar');
+        historyToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            historyToggle.setAttribute('aria-expanded', sidebar.classList.contains('active'));
+            showToast(sidebar.classList.contains('active') ? 'Historique affiché' : 'Historique masqué');
+        });
+
+        // Toggle filter bar on mobile
+        const filterToggle = document.querySelector('.filter-bar-toggle');
+        const filterBar = document.querySelector('.filter-bar');
+        filterToggle.addEventListener('click', () => {
+            filterBar.classList.toggle('collapsed');
+            filterToggle.setAttribute('aria-expanded', !filterBar.classList.contains('collapsed'));
+            showToast(filterBar.classList.contains('collapsed') ? 'Filtres masqués' : 'Filtres affichés');
+        });
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.querySelector('.toast');
+            const toastBody = toast.querySelector('.toast-body');
+            toastBody.textContent = message;
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // Keyboard navigation for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    historyToggle.setAttribute('aria-expanded', 'false');
+                    showToast('Historique masqué');
+                }
+                if (!filterBar.classList.contains('collapsed')) {
+                    filterBar.classList.add('collapsed');
+                    filterToggle.setAttribute('aria-expanded', 'false');
+                    showToast('Filtres masqués');
+                }
+            }
+        });
+
+        // Focus management for filter inputs
+        document.querySelectorAll('.filter-bar input, .filter-bar select').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('focused');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('focused');
+            });
+        });
+
+        // Initialize map
+        const map = L.map('map').setView([45.764043, 4.835659], 13); // Lyon coordinates
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([45.764043, 4.835659]).addTo(map).bindPopup('Start: 118 Rue Marietton');
+        L.marker([45.757814, 4.864339]).addTo(map).bindPopup('End: 28 Rue de la Bannière');
+
+        // Lazy load history items
+        const historyItems = document.querySelectorAll('.history-item');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        historyItems.forEach(item => observer.observe(item));
+    </script>
+</body>
+</html>

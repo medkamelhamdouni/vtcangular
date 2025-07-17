@@ -1,0 +1,91 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h2>Edit Trip <span *ngIf="tripId">- #{{ tripId }}</span></h2>
+    </div>
+
+    <div class="card-body">
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="tripForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="from" class="form-label">From</label>
+            <input type="text" id="from" formControlName="from" class="form-control" [class.is-invalid]="f['from'].invalid && f['from'].touched">
+            <div *ngIf="f['from'].invalid && f['from'].touched" class="invalid-feedback">
+              Departure location is required.
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="destination" class="form-label">To</label>
+            <input type="text" id="destination" formControlName="destination" class="form-control" [class.is-invalid]="f['destination'].invalid && f['destination'].touched">
+            <div *ngIf="f['destination'].invalid && f['destination'].touched" class="invalid-feedback">
+              Destination location is required.
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="date" class="form-label">Date and Time</label>
+            <input type="datetime-local" id="date" formControlName="date" class="form-control" [class.is-invalid]="f['date'].invalid && f['date'].touched">
+            <div *ngIf="f['date'].invalid && f['date'].touched" class="invalid-feedback">
+              A valid date and time are required.
+            </div>
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <label for="prix" class="form-label">Price (€)</label>
+            <input type="number" id="prix" formControlName="prix" class="form-control" [class.is-invalid]="f['prix'].invalid && f['prix'].touched">
+            <div *ngIf="f['prix'].invalid && f['prix'].touched" class="invalid-feedback">
+              A valid price is required.
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="telephone" class="form-label">Telephone</label>
+            <input type="tel" id="telephone" formControlName="telephone" class="form-control" [class.is-invalid]="f['telephone'].invalid && f['telephone'].touched">
+            <div *ngIf="f['telephone'].invalid && f['telephone'].touched" class="invalid-feedback">
+              <span *ngIf="f['telephone'].errors?.['required']">Telephone is required.</span>
+              <span *ngIf="f['telephone'].errors?.['pattern']">Please enter a valid phone number.</span>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="dispatcherId" class="form-label">Dispatcher ID (Optional)</label>
+            <input type="text" id="dispatcherId" formControlName="dispatcherId" class="form-control">
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="comment" class="form-label">Comment</label>
+          <textarea id="comment" formControlName="comment" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox" id="alleretour" formControlName="alleretour" class="form-check-input">
+          <label for="alleretour" class="form-check-label">Round Trip</label>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" [routerLink]="['/home']">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="tripForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            {{ isLoading ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

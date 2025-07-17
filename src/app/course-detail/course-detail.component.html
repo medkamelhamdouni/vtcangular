@@ -1,0 +1,136 @@
+<div class="container-fluid mt-4" role="main" *ngIf="course">
+  <button class="btn btn-primary history-toggle d-md-none mb-3" (click)="toggleHistorySidebar()">
+    <i class="fas fa-history"></i> Historique
+  </button>
+
+  <div class="row">
+    <aside class="col-md-3" role="complementary">
+      <div class="history-sidebar" [class.active]="isHistorySidebarVisible">
+        <h5>Historique de Course</h5>
+        <hr>
+        <div *ngIf="!course.history || course.history.length === 0" class="text-muted">
+          Aucun historique disponible.
+        </div>
+        <div class="history-item" role="button" tabindex="0" *ngFor="let item of course.history" (click)="onHistoryItemClick(item)" (keydown.enter)="onHistoryItemClick(item)">
+          <p class="mb-0 text-muted">{{ item.timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</p>
+          <p class="mb-1">{{ item.title }} <span class="badge" [ngClass]="item.titleBadgeClass">{{ item.titleBadge }}</span></p>
+          <small class="text-muted">{{ item.details }} <span class="badge" [ngClass]="item.statusBadgeClass">{{ item.statusBadge }}</span></small>
+        </div>
+      </div>
+    </aside>
+
+    <div class="col-md-9">
+      <div class="content-area">
+        <div class="sticky-header">
+          <div class="row align-items-end mb-4 g-3">
+            <div class="col-md-3">
+              <label for="affecter-select" class="form-label">Affecter Chauffeur</label>
+              <select class="form-select" id="affecter-select" [(ngModel)]="selectedDriver">
+                <option value="" disabled>Sélectionner...</option>
+                <option *ngFor="let driver of drivers" [value]="driver">{{ driver }}</option>
+              </select>
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="smsCheck1" [(ngModel)]="sendSmsDriver">
+                <label class="form-check-label" for="smsCheck1">Envoyer SMS</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-primary w-100" (click)="assignDriver()"><i class="fas fa-user-check"></i> Assigner</button>
+            </div>
+            <div class="col-md-3">
+              <label for="affecter-a-select" class="form-label">Affecter Société</label>
+              <select class="form-select" id="affecter-a-select" [(ngModel)]="selectedCompany">
+                <option value="" disabled>Sélectionner...</option>
+                <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
+              </select>
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="smsCheck2" [(ngModel)]="sendSmsCompany">
+                <label class="form-check-label" for="smsCheck2">Envoyer SMS</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+               <button class="btn btn-info text-white w-100" (click)="assignCompany()"><i class="fas fa-building"></i> Assigner</button>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+            <ul class="nav nav-tabs border-0">
+              <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Confirmation</a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-file-invoice"></i> Facture</a></li>
+            </ul>
+            <div class="d-flex gap-2">
+              <button class="btn btn-danger" title="Arrêter la course" (click)="stopCourse()">Stop</button>
+              <button class="btn btn-secondary" title="Copier les détails" (click)="copyDetails()">Copier</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <strong>Application</strong>
+            <p [ngClass]="{'text-success': course.payment.application === 'Payée', 'text-danger': course.payment.application === 'Non payée'}">{{ course.payment.application }}</p>
+          </div>
+          <div class="col-md-4">
+            <strong>SOC</strong>
+            <p [ngClass]="{'text-success': course.payment.soc === 'Payée', 'text-danger': course.payment.soc === 'Non payée'}">{{ course.payment.soc }}</p>
+          </div>
+          <div class="col-md-4">
+            <strong>Paypal</strong>
+            <p>{{ course.payment.paypal }}</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="info-card">
+              <h6 class="info-card-header">Client <i class="fas fa-edit" role="button" title="Modifier"></i></h6>
+              <dl>
+                <dt>Nom</dt><dd>{{ course.client.name }}</dd>
+                <dt>N° tel</dt><dd>{{ course.client.phone }}</dd>
+                <dt>N° pax</dt><dd>{{ course.client.pax }}</dd>
+                <dt>Commentaire</dt><dd>{{ course.client.comment || '-' }}</dd>
+                <dt>Email</dt><dd>{{ course.client.email }}</dd>
+                <dt>Préférence</dt><dd>{{ course.client.preference || '-' }}</dd>
+              </dl>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="info-card">
+              <h6 class="info-card-header">Course <span class="fw-normal">Ville: {{ course.details.city }}</span></h6>
+              <div class="progress-container">
+                <div class="progress" role="progressbar" [attr.aria-valuenow]="course.details.progress" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" [style.width.%]="course.details.progress"></div>
+                </div>
+                <small class="text-muted">Course en cours ({{ course.details.progress }}%)</small>
+              </div>
+              <div id="map" #map style="height: 300px; border-radius: 8px; margin-bottom: 1rem;"></div>
+              <dl>
+                <dt>État</dt><dd>{{ course.details.status }}</dd>
+                <dt>Date C</dt><dd>{{ course.details.creationDate | date: 'HH:mm dd/MM/yyyy' }}</dd>
+                <dt>De</dt><dd>{{ course.details.from }}</dd>
+                <dt>À</dt><dd>{{ course.details.to }}</dd>
+                <dt>Distance</dt><dd>{{ course.details.distance }} Km</dd>
+                <dt>Durée estimée</dt><dd>{{ course.details.estimatedDuration }} min</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+            <h6 class="info-card-header">Référence</h6>
+            <dl>
+                <dt>Référence ID</dt><dd>{{ course.id }}</dd>
+                <dt>Chauffeur</dt><dd>{{ course.reference.driver || 'Non assigné' }}</dd>
+                <dt>Société</dt><dd>{{ course.reference.company || 'N/A' }}</dd>
+                <dt>Paiement</dt><dd>{{ course.reference.paymentStatus }}</dd>
+            </dl>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!course" class="alert alert-warning m-4">
+  Les données de la course sont en cours de chargement ou ne sont pas disponibles.
+</div>
