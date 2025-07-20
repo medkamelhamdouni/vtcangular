@@ -33,6 +33,8 @@ export interface Course {
     application: 'Payée' | 'Non payée';
     soc: 'Payée' | 'Non payée';
     paypal: string;
+    amount?: string; // e.g., "150.00 EUR"
+    invoiceDate?: Date; // Date invoice was issued
   };
   history: HistoryItem[];
 }

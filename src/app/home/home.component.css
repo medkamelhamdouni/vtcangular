@@ -22,47 +22,31 @@
         }
 
        
-        /* Stat Boxes */
-        .stat-box {
-            color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 2px solid #e5e7eb;
+            background-color: var(--background-color);
+        }
+        .nav-tabs .nav-link {
+            color: #6b7280;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 6px 6px 0 0;
             transition: var(--transition);
-            position: relative;
-            overflow: hidden;
         }
-        .stat-box:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--card-shadow);
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            background-color: #f1f5f9;
         }
-        .stat-box h3 {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background: #fff;
+            border-color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
         }
-        .stat-box p {
-            margin-bottom: 0;
-            font-size: 0.8rem;
-            opacity: 0.85;
+        .nav-tabs .nav-link i {
+            margin-right: 0.4rem;
         }
-        .stat-box::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
-            pointer-events: none;
-        }
-        .bg-devis { background-color: #ef4444; }
-        .bg-non-vendu { background-color: #f59e0b; }
-        .bg-en-attente { background-color: #06b6d4; }
-        .bg-en-cours { background-color: #22c55e; }
-        .bg-terminee { background-color: #6b7280; }
-        .bg-annulee { background-color: #ef4444; }
-
 
         /* Table Enhancements */
         .table-responsive {

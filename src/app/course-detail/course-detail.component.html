@@ -1,136 +1,292 @@
-<div class="container-fluid mt-4" role="main" *ngIf="course">
-  <button class="btn btn-primary history-toggle d-md-none mb-3" (click)="toggleHistorySidebar()">
-    <i class="fas fa-history"></i> Historique
-  </button>
+<app-navbar></app-navbar>
 
-  <div class="row">
-    <aside class="col-md-3" role="complementary">
-      <div class="history-sidebar" [class.active]="isHistorySidebarVisible">
-        <h5>Historique de Course</h5>
-        <hr>
-        <div *ngIf="!course.history || course.history.length === 0" class="text-muted">
-          Aucun historique disponible.
-        </div>
-        <div class="history-item" role="button" tabindex="0" *ngFor="let item of course.history" (click)="onHistoryItemClick(item)" (keydown.enter)="onHistoryItemClick(item)">
-          <p class="mb-0 text-muted">{{ item.timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</p>
-          <p class="mb-1">{{ item.title }} <span class="badge" [ngClass]="item.titleBadgeClass">{{ item.titleBadge }}</span></p>
-          <small class="text-muted">{{ item.details }} <span class="badge" [ngClass]="item.statusBadgeClass">{{ item.statusBadge }}</span></small>
-        </div>
-      </div>
-    </aside>
+<div class="container-fluid py-3">
+  <div class="container-fluid mt-4" role="main" *ngIf="course">
+    <button class="btn btn-primary history-toggle d-md-none mb-3" (click)="toggleHistorySidebar()" aria-label="Afficher ou masquer l'historique">
+      <i class="fas fa-history"></i> Historique
+    </button>
 
-    <div class="col-md-9">
-      <div class="content-area">
-        <div class="sticky-header">
-          <div class="row align-items-end mb-4 g-3">
-            <div class="col-md-3">
-              <label for="affecter-select" class="form-label">Affecter Chauffeur</label>
-              <select class="form-select" id="affecter-select" [(ngModel)]="selectedDriver">
-                <option value="" disabled>Sélectionner...</option>
-                <option *ngFor="let driver of drivers" [value]="driver">{{ driver }}</option>
-              </select>
-              <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="smsCheck1" [(ngModel)]="sendSmsDriver">
-                <label class="form-check-label" for="smsCheck1">Envoyer SMS</label>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <button class="btn btn-primary w-100" (click)="assignDriver()"><i class="fas fa-user-check"></i> Assigner</button>
-            </div>
-            <div class="col-md-3">
-              <label for="affecter-a-select" class="form-label">Affecter Société</label>
-              <select class="form-select" id="affecter-a-select" [(ngModel)]="selectedCompany">
-                <option value="" disabled>Sélectionner...</option>
-                <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
-              </select>
-              <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="smsCheck2" [(ngModel)]="sendSmsCompany">
-                <label class="form-check-label" for="smsCheck2">Envoyer SMS</label>
-              </div>
-            </div>
-            <div class="col-md-3">
-               <button class="btn btn-info text-white w-100" (click)="assignCompany()"><i class="fas fa-building"></i> Assigner</button>
-            </div>
+    <div class="row">
+      <aside class="col-md-3" role="complementary">
+        <div class="history-sidebar" [class.active]="isHistorySidebarVisible">
+          <h5>Historique de Course</h5>
+          <hr>
+          <div *ngIf="!course.history || course.history.length === 0" class="text-muted">
+            Aucun historique disponible.
           </div>
-
-          <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
-            <ul class="nav nav-tabs border-0">
-              <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Confirmation</a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-file-invoice"></i> Facture</a></li>
-            </ul>
-            <div class="d-flex gap-2">
-              <button class="btn btn-danger" title="Arrêter la course" (click)="stopCourse()">Stop</button>
-              <button class="btn btn-secondary" title="Copier les détails" (click)="copyDetails()">Copier</button>
-            </div>
+          <div class="history-item" role="button" tabindex="0" *ngFor="let item of course.history" (click)="onHistoryItemClick(item)" (keydown.enter)="onHistoryItemClick(item)" aria-label="Détails de l'historique">
+            <p class="mb-0 text-muted">{{ item.timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</p>
+            <p class="mb-1">{{ item.title }} <span class="badge" [ngClass]="item.titleBadgeClass">{{ item.titleBadge }}</span></p>
+            <small class="text-muted">{{ item.details }} <span class="badge" [ngClass]="item.statusBadgeClass">{{ item.statusBadge }}</span></small>
           </div>
         </div>
+      </aside>
 
-        <div class="row mb-4">
-          <div class="col-md-4">
-            <strong>Application</strong>
-            <p [ngClass]="{'text-success': course.payment.application === 'Payée', 'text-danger': course.payment.application === 'Non payée'}">{{ course.payment.application }}</p>
-          </div>
-          <div class="col-md-4">
-            <strong>SOC</strong>
-            <p [ngClass]="{'text-success': course.payment.soc === 'Payée', 'text-danger': course.payment.soc === 'Non payée'}">{{ course.payment.soc }}</p>
-          </div>
-          <div class="col-md-4">
-            <strong>Paypal</strong>
-            <p>{{ course.payment.paypal }}</p>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="info-card">
-              <h6 class="info-card-header">Client <i class="fas fa-edit" role="button" title="Modifier"></i></h6>
-              <dl>
-                <dt>Nom</dt><dd>{{ course.client.name }}</dd>
-                <dt>N° tel</dt><dd>{{ course.client.phone }}</dd>
-                <dt>N° pax</dt><dd>{{ course.client.pax }}</dd>
-                <dt>Commentaire</dt><dd>{{ course.client.comment || '-' }}</dd>
-                <dt>Email</dt><dd>{{ course.client.email }}</dd>
-                <dt>Préférence</dt><dd>{{ course.client.preference || '-' }}</dd>
-              </dl>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="info-card">
-              <h6 class="info-card-header">Course <span class="fw-normal">Ville: {{ course.details.city }}</span></h6>
-              <div class="progress-container">
-                <div class="progress" role="progressbar" [attr.aria-valuenow]="course.details.progress" aria-valuemin="0" aria-valuemax="100">
-                  <div class="progress-bar" [style.width.%]="course.details.progress"></div>
+      <div class="col-md-9">
+        <div class="content-area">
+          <!-- Sticky Header with Tabs -->
+          <div class="sticky-header">
+            <div class="row align-items-end mb-4 g-3">
+              <div class="col-md-3">
+                <label for="affecter-select" class="form-label">Affecter Chauffeur</label>
+                <select class="form-select" id="affecter-select" [(ngModel)]="selectedDriver" aria-label="Sélectionner un chauffeur">
+                  <option value="" disabled>Sélectionner...</option>
+                  <option *ngFor="let driver of drivers" [value]="driver">{{ driver }}</option>
+                </select>
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" id="smsCheck1" [(ngModel)]="sendSmsDriver">
+                  <label class="form-check-label" for="smsCheck1">Envoyer SMS</label>
                 </div>
-                <small class="text-muted">Course en cours ({{ course.details.progress }}%)</small>
               </div>
-              <div id="map" #map style="height: 300px; border-radius: 8px; margin-bottom: 1rem;"></div>
-              <dl>
-                <dt>État</dt><dd>{{ course.details.status }}</dd>
-                <dt>Date C</dt><dd>{{ course.details.creationDate | date: 'HH:mm dd/MM/yyyy' }}</dd>
-                <dt>De</dt><dd>{{ course.details.from }}</dd>
-                <dt>À</dt><dd>{{ course.details.to }}</dd>
-                <dt>Distance</dt><dd>{{ course.details.distance }} Km</dd>
-                <dt>Durée estimée</dt><dd>{{ course.details.estimatedDuration }} min</dd>
-              </dl>
+              <div class="col-md-3">
+                <button class="btn btn-primary w-100" (click)="assignDriver()" aria-label="Assigner un chauffeur"><i class="fas fa-user-check"></i> Assigner</button>
+              </div>
+              <div class="col-md-3">
+                <label for="affecter-a-select" class="form-label">Affecter Société</label>
+                <select class="form-select" id="affecter-a-select" [(ngModel)]="selectedCompany" aria-label="Sélectionner une société">
+                  <option value="" disabled>Sélectionner...</option>
+                  <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
+                </select>
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" id="smsCheck2" [(ngModel)]="sendSmsCompany">
+                  <label class="form-check-label" for="smsCheck2">Envoyer SMS</label>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-info text-white w-100" (click)="assignCompany()" aria-label="Assigner une société"><i class="fas fa-building"></i> Assigner</button>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+              <ul class="nav nav-tabs border-0">
+                <li class="nav-item">
+                  <a class="nav-link" [class.active]="activeTab === 'confirmation'" (click)="setActiveTab('confirmation'); $event.preventDefault()" aria-current="page" href="#">Confirmation</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" [class.active]="activeTab === 'facture'" (click)="setActiveTab('facture'); $event.preventDefault()" href="#"><i class="fas fa-file-invoice"></i> Facture</a>
+                </li>
+              </ul>
+              <div class="d-flex gap-2">
+                <button class="btn btn-danger" title="Arrêter la course" (click)="stopCourse()" aria-label="Arrêter la course">Stop</button>
+                <button class="btn btn-secondary" title="Copier les détails" (click)="copyDetails()" aria-label="Copier les détails de la course">Copier</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content">
+            <!-- Confirmation Tab -->
+            <div *ngIf="activeTab === 'confirmation'" class="tab-pane">
+              <div class="row mb-4">
+                <div class="col-md-4">
+                  <strong>Application</strong>
+                  <p [ngClass]="{'text-success': course.payment.application === 'Payée', 'text-danger': course.payment.application === 'Non payée'}">{{ course.payment.application }}</p>
+                </div>
+                <div class="col-md-4">
+                  <strong>SOC</strong>
+                  <p [ngClass]="{'text-success': course.payment.soc === 'Payée', 'text-danger': course.payment.soc === 'Non payée'}">{{ course.payment.soc }}</p>
+                </div>
+                <div class="col-md-4">
+                  <strong>Paypal</strong>
+                  <p>{{ course.payment.paypal }}</p>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-card">
+                    <h6 class="info-card-header">Client <i class="fas fa-edit" role="button" title="Modifier" aria-label="Modifier les informations du client"></i></h6>
+                    <dl>
+                      <dt>Nom</dt><dd>{{ course.client.name }}</dd>
+                      <dt>N° tel</dt><dd>{{ course.client.phone }}</dd>
+                      <dt>N° pax</dt><dd>{{ course.client.pax }}</dd>
+                      <dt>Commentaire</dt><dd>{{ course.client.comment || '-' }}</dd>
+                      <dt>Email</dt><dd>{{ course.client.email }}</dd>
+                      <dt>Préférence</dt><dd>{{ course.client.preference || '-' }}</dd>
+                    </dl>
+                  </div>
+                  <div class="info-card">
+                    <h6 class="info-card-header">Référence</h6>
+                    <dl>
+                      <dt>Référence ID</dt><dd>{{ course.id }}</dd>
+                      <dt>Chauffeur</dt><dd>{{ course.reference.driver || 'Non assigné' }}</dd>
+                      <dt>Société</dt><dd>{{ course.reference.company || 'N/A' }}</dd>
+                      <dt>Paiement</dt><dd>{{ course.reference.paymentStatus }}</dd>
+                    </dl>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-card">
+                    <h6 class="info-card-header">Course <span class="fw-normal">Ville: {{ course.details.city }}</span></h6>
+                    <div class="progress-container">
+                      <div class="progress" role="progressbar" [attr.aria-valuenow]="course.details.progress" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" [style.width.%]="course.details.progress"></div>
+                      </div>
+                      <small class="text-muted">Course en cours ({{ course.details.progress }}%)</small>
+                    </div>
+                    <div id="map" #map style="height: 300px; border-radius: 8px; margin-bottom: 1rem;"></div>
+                    <dl>
+                      <dt>État</dt><dd>{{ course.details.status }}</dd>
+                      <dt>Date C</dt><dd>{{ course.details.creationDate | date: 'HH:mm dd/MM/yyyy' }}</dd>
+                      <dt>De</dt><dd>{{ course.details.from }}</dd>
+                      <dt>À</dt><dd>{{ course.details.to }}</dd>
+                      <dt>Distance</dt><dd>{{ course.details.distance }} Km</dd>
+                      <dt>Durée estimée</dt><dd>{{ course.details.estimatedDuration }} min</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Facture (Invoice) Tab -->
+            <div *ngIf="activeTab === 'facture'" class="tab-pane">
+              <div class="invoice-header">
+                <h2 class="text-primary mb-0"><i class="fas fa-file-invoice me-2"></i> Facture - EasyMove</h2>
+                <p class="text-muted">Détails de la facture pour la course #{{ course.id }}</p>
+              </div>
+
+              <div class="row g-4">
+                <!-- Client Info Card -->
+                <div class="col-md-6">
+                  <div class="invoice-card">
+                    <h5 class="invoice-card-title"><i class="fas fa-user me-2"></i> Informations Client</h5>
+                    <div class="invoice-field" role="group" aria-label="Nom du client">
+                      <span class="field-label"><i class="fas fa-user-circle"></i> Nom</span>
+                      <span class="field-value">{{ course.client.name }}</span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Email du client">
+                      <span class="field-label"><i class="fas fa-envelope"></i> Email</span>
+                      <span class="field-value">{{ course.client.email }}</span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Téléphone du client">
+                      <span class="field-label"><i class="fas fa-phone"></i> Téléphone</span>
+                      <span class="field-value">{{ course.client.phone }}</span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Nombre de passagers">
+                      <span class="field-label"><i class="fas fa-users"></i> Nombre de passagers</span>
+                      <span class="field-value">{{ course.client.pax }}</span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Commentaire du client">
+                      <span class="field-label"><i class="fas fa-comment"></i> Commentaire</span>
+                      <span class="field-value">{{ course.client.comment || 'Aucun' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Info Card -->
+                <div class="col-md-6">
+                  <div class="invoice-card">
+                    <h5 class="invoice-card-title"><i class="fas fa-credit-card me-2"></i> Informations de Paiement</h5>
+                    <div class="invoice-field" role="group" aria-label="Statut du paiement">
+                      <span class="field-label"><i class="fas fa-info-circle" title="Statut global du paiement"></i> Statut</span>
+                      <span class="field-value">
+                        <span class="badge" [ngClass]="{
+                          'bg-success': course.reference.paymentStatus === 'Payée',
+                          'bg-warning': course.reference.paymentStatus === 'En attente',
+                          'bg-danger': course.reference.paymentStatus === 'Échoué'
+                        }">{{ course.reference.paymentStatus }}</span>
+                        <i *ngIf="isPaymentOverdue" class="fas fa-exclamation-circle text-danger ms-2" title="Paiement en retard"></i>
+                      </span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Paiement via application">
+                      <span class="field-label"><i class="fas fa-mobile-alt" title="Paiement via application"></i> Application</span>
+                      <span class="field-value" [ngClass]="{'text-success': course.payment.application === 'Payée', 'text-danger': course.payment.application === 'Non payée'}">
+                        {{ course.payment.application }}
+                      </span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Paiement par société">
+                      <span class="field-label"><i class="fas fa-university" title="Paiement par société"></i> SOC</span>
+                      <span class="field-value" [ngClass]="{'text-success': course.payment.soc === 'Payée', 'text-danger': course.payment.soc === 'Non payée'}">
+                        {{ course.payment.soc }}
+                      </span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Identifiant PayPal">
+                      <span class="field-label"><i class="fab fa-paypal" title="Identifiant PayPal"></i> PayPal</span>
+                      <span class="field-value">{{ course.payment.paypal || 'N/A' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Invoice Summary Card -->
+                <div class="col-12">
+                  <div class="invoice-card">
+                    <h5 class="invoice-card-title"><i class="fas fa-file-invoice-dollar me-2"></i> Résumé de la Facture</h5>
+                    <div class="invoice-field" role="group" aria-label="Référence de la facture">
+                      <span class="field-label"><i class="fas fa-hashtag"></i> Référence ID</span>
+                      <span class="field-value">{{ course.id }}</span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Date d'émission">
+                      <span class="field-label"><i class="fas fa-calendar-alt"></i> Date d'Émission</span>
+                      <span class="field-value">{{ course.payment.invoiceDate || course.details.creationDate | date: 'dd/MM/yyyy' }}</span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Montant total de la facture">
+                      <span class="field-label"><i class="fas fa-euro-sign"></i> Montant Total</span>
+                      <div class="field-value d-flex align-items-center gap-2">
+                        <input *ngIf="isEditingAmount" type="text" class="form-control form-control-sm w-50" [(ngModel)]="editableAmount" placeholder="Montant (ex: 150.00 EUR)" aria-label="Modifier le montant">
+                        <span *ngIf="!isEditingAmount" class="text-primary fw-bold">{{ course.payment.amount || 'Non défini' }}</span>
+                        <button class="btn btn-sm btn-outline-primary" (click)="toggleEditAmount()" *ngIf="!isEditingAmount" aria-label="Modifier le montant">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" (click)="saveAmount()" *ngIf="isEditingAmount" aria-label="Enregistrer le montant">
+                          <i class="fas fa-save"></i>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" (click)="toggleEditAmount()" *ngIf="isEditingAmount" aria-label="Annuler la modification">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="mt-4 d-flex gap-2 flex-wrap">
+                      <button class="btn btn-primary" (click)="generateInvoicePreview()" [disabled]="isDownloading" aria-label="Prévisualiser la facture">
+                        <i class="fas fa-eye me-2"></i> Aperçu
+                      </button>
+                      <button class="btn btn-primary" (click)="downloadInvoice()" [disabled]="isDownloading" aria-label="Télécharger la facture">
+                        <i class="fas fa-download me-2"></i> 
+                        {{ isDownloading ? 'Téléchargement...' : 'Télécharger Facture' }}
+                        <span *ngIf="isDownloading" class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+                      </button>
+                      <button class="btn btn-secondary" (click)="copyInvoiceDetails()" aria-label="Copier les détails de la facture">
+                        <i class="fas fa-copy me-2"></i> Copier Détails
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PDF Preview Modal -->
+              <div class="modal fade" [ngClass]="{'show d-block': showPreview}" tabindex="-1" role="dialog" *ngIf="showPreview" aria-labelledby="previewModalLabel">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="previewModalLabel">Aperçu de la Facture</h5>
+                      <button type="button" class="btn-close" (click)="closePreview()" aria-label="Fermer l'aperçu"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="d-flex justify-content-end mb-2">
+                        <button class="btn btn-sm btn-outline-primary me-2" (click)="zoomIn()" aria-label="Zoom avant">
+                          <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" (click)="zoomOut()" aria-label="Zoom arrière">
+                          <i class="fas fa-search-minus"></i>
+                        </button>
+                      </div>
+                      <iframe [src]="pdfPreviewUrl | safe" width="100%" [style.height.px]="pdfHeight" *ngIf="pdfPreviewUrl" title="Aperçu de la facture"></iframe>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" (click)="closePreview()" aria-label="Fermer l'aperçu">Fermer</button>
+                      <button type="button" class="btn btn-primary" (click)="downloadInvoice()" aria-label="Télécharger la facture">Télécharger</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-backdrop fade" [ngClass]="{'show': showPreview}" *ngIf="showPreview"></div>
             </div>
           </div>
         </div>
-
-        <div class="info-card">
-            <h6 class="info-card-header">Référence</h6>
-            <dl>
-                <dt>Référence ID</dt><dd>{{ course.id }}</dd>
-                <dt>Chauffeur</dt><dd>{{ course.reference.driver || 'Non assigné' }}</dd>
-                <dt>Société</dt><dd>{{ course.reference.company || 'N/A' }}</dd>
-                <dt>Paiement</dt><dd>{{ course.reference.paymentStatus }}</dd>
-            </dl>
-        </div>
-
       </div>
     </div>
   </div>
-</div>
 
-<div *ngIf="!course" class="alert alert-warning m-4">
-  Les données de la course sont en cours de chargement ou ne sont pas disponibles.
+  <div *ngIf="!course" class="alert alert-warning m-4" role="alert">
+    Les données de la course sont en cours de chargement ou ne sont pas disponibles.
+  </div>
 </div>

@@ -1,0 +1,89 @@
+/* Stat Boxes */
+.stat-box {
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stat-box:hover, .stat-box:focus {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.stat-box-content {
+  position: relative;
+  z-index: 2;
+}
+
+.stat-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.stat-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.stat-description {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.stat-box-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.stat-box:hover .stat-box-overlay, .stat-box:focus .stat-box-overlay {
+  opacity: 0.3;
+}
+
+/* Background Colors */
+.bg-devis { background-color: #dc2626; }
+.bg-non-vendu { background-color: #d97706; }
+.bg-en-attente { background-color: #0891b2; }
+.bg-en-cours { background-color: #16a34a; }
+.bg-terminee { background-color: #4b5563; }
+.bg-annulee { background-color: #dc2626; }
+
+/* Accessibility */
+.stat-box:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+  .stat-box {
+    padding: 1rem;
+  }
+  .stat-title {
+    font-size: 1.1rem;
+  }
+  .stat-icon {
+    font-size: 1.5rem;
+  }
+  .stat-description {
+    font-size: 0.75rem;
+  }
+}

@@ -1,28 +1,27 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NavbarComponent } from '../navbar/navbar.component';
 
-// To use Bootstrap's Tooltip JS, you might need to import it.
-// Note: The recommended Angular way is to use a library like ng-bootstrap.
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-driver-profile',
   standalone: true,
-  imports: [CommonModule,NavbarComponent], // Use CommonModule for directives like *ngIf, *ngFor, etc.
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavbarComponent],
   templateUrl: './driver-profile.component.html',
   styleUrls: ['./driver-profile.component.css']
 })
 export class DriverProfileComponent implements AfterViewInit {
-
-  // State for the active tab
   activeTab: string = 'info';
-
-  // State for search button loading indicators
   isSearchingPhone = false;
   isSearchingEmail = false;
+  isUpdating = false;
+  searchName: string = '';
+  searchPhone: string = '';
+  searchEmail: string = '';
+  profileForm: FormGroup;
 
-  // Driver data object
   driver = {
     name: 'Toumani Traore',
     initial: 'T',
@@ -61,44 +60,111 @@ export class DriverProfileComponent implements AfterViewInit {
     currentPosition: '-'
   };
 
-  constructor() { }
+  courses = [
+    { id: 1, date: '15/07/2025', start: 'Paris Centre', end: 'Aéroport CDG', distance: 25, fare: 45, status: 'Terminé' },
+    { id: 2, date: '14/07/2025', start: 'Gare du Nord', end: 'Montmartre', distance: 5, fare: 15, status: 'Annulé' }
+  ];
 
-  /**
-   * Initializes Bootstrap tooltips after the view has been rendered.
-   * This is the correct lifecycle hook for DOM-dependent initializations.
-   */
+  documents = [
+    { id: 1, name: 'Permis de conduire', status: 'Validé' },
+    { id: 2, name: 'Carte grise', status: 'Expiré' },
+    { id: 3, name: 'Assurance', status: 'Validé' }
+  ];
+
+  payments = [
+    { id: 1, date: '15/07/2025', amount: 45, method: 'Carte bancaire', status: 'Payé' },
+    { id: 2, date: '14/07/2025', amount: 15, method: 'Virement', status: 'En attente' }
+  ];
+
+  activityHistory = [
+    { id: 1, action: 'Connexion', date: '15/07/2025 10:30', description: 'Connexion à l\'application' },
+    { id: 2, action: 'Mise à jour profil', date: '14/07/2025 14:45', description: 'Mise à jour des informations de véhicule' }
+  ];
+
+  filteredCourses = [...this.courses];
+  filteredDocuments = [...this.documents];
+  filteredPayments = [...this.payments];
+  filteredActivityHistory = [...this.activityHistory];
+
+  constructor(private fb: FormBuilder) {
+    this.profileForm = this.fb.group({
+      name: [this.driver.name, [Validators.required, Validators.minLength(2)]],
+      city: [this.driver.city, [Validators.required]],
+      status: [this.driver.status, [Validators.required]],
+      cb1: [this.driver.cb1, [Validators.required]]
+    });
+  }
+
   ngAfterViewInit(): void {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
   }
 
-  /**
-   * Sets the active tab.
-   * @param tabName The name of the tab to activate.
-   */
   selectTab(tabName: string): void {
     this.activeTab = tabName;
+    this.filterContent();
   }
 
-  /**
-   * Simulates a search action for the phone number.
-   */
   searchByPhone(): void {
     this.isSearchingPhone = true;
     setTimeout(() => {
       this.isSearchingPhone = false;
-      // Add actual search logic here
+      this.filterContent();
     }, 1000);
   }
 
-  /**
-   * Simulates a search action for the email.
-   */
   searchByEmail(): void {
     this.isSearchingEmail = true;
     setTimeout(() => {
       this.isSearchingEmail = false;
-      // Add actual search logic here
+      this.filterContent();
     }, 1000);
+  }
+
+  filterContent(): void {
+    const searchText = (this.searchName + this.searchPhone + this.searchEmail).toLowerCase();
+    this.filteredCourses = this.courses.filter(course =>
+      course.start.toLowerCase().includes(searchText) ||
+      course.end.toLowerCase().includes(searchText) ||
+      course.status.toLowerCase().includes(searchText)
+    );
+    this.filteredDocuments = this.documents.filter(doc =>
+      doc.name.toLowerCase().includes(searchText) ||
+      doc.status.toLowerCase().includes(searchText)
+    );
+    this.filteredPayments = this.payments.filter(payment =>
+      payment.method.toLowerCase().includes(searchText) ||
+      payment.status.toLowerCase().includes(searchText)
+    );
+    this.filteredActivityHistory = this.activityHistory.filter(activity =>
+      activity.action.toLowerCase().includes(searchText) ||
+      activity.description.toLowerCase().includes(searchText)
+    );
+  }
+
+  updateProfile(): void {
+    if (this.profileForm.valid) {
+      const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+      modal.show();
+    }
+  }
+
+  confirmUpdate(): void {
+    this.isUpdating = true;
+    setTimeout(() => {
+      this.driver = { ...this.driver, ...this.profileForm.value };
+      this.isUpdating = false;
+      const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+      modal.hide();
+      console.log('Profile updated:', this.driver);
+    }, 1000);
+  }
+
+  viewDocument(docId: number): void {
+    console.log('Viewing document:', docId);
+  }
+
+  viewInvoice(paymentId: number): void {
+    console.log('Viewing invoice:', paymentId);
   }
 }

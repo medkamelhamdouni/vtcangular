@@ -7,29 +7,36 @@ import { Course } from '../models/course.model';
 import { HistoryItem } from '../models/history-item.model';
 import { CourseService } from '../services/course.service';
 import { NotificationService } from '../services/notification.service';
+import { NavbarComponent } from "../navbar/navbar.component";
+import { SafePipe } from '../safe.pipe';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-course-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent, SafePipe],
   templateUrl: './course-detail.component.html',
   styleUrls: ['./course-detail.component.css'],
-  // Note: Removed ChangeDetectionStrategy.OnPush to simplify updates after data loading
 })
 export class CourseDetailComponent implements OnInit, AfterViewInit {
-  // The component no longer takes an @Input() for the course.
-  // It will fetch its own data.
   course: Course | undefined;
-  isLoading = true; // To show a loading message
-
+  isLoading = true;
+  isDownloading = false;
+  showPreview = false;
+  pdfPreviewUrl: string | null = null;
+  pdfHeight: number = 500; // Initial PDF preview height
+  isEditingAmount: boolean = false;
+  editableAmount: string = '';
   @ViewChild('map') private mapContainer!: ElementRef;
   private map: any;
 
-  // Mock data for dropdowns
+  // Tab state
+  activeTab: 'confirmation' | 'facture' = 'confirmation';
+
   drivers = ['Toumani Traore', 'Amina Diallo', 'Jean Dupont'];
   companies = ['Good Cab', 'Fast Track'];
 
-  // State for UI
   isHistorySidebarVisible = false;
   selectedDriver: string = '';
   sendSmsDriver: boolean = false;
@@ -40,23 +47,19 @@ export class CourseDetailComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private courseService: CourseService,
     private notificationService: NotificationService,
-    private cdr: ChangeDetectorRef // To manually trigger change detection if needed
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    // Get the 'id' from the URL, e.g., '/course/persUxdgo8eeeys56iPb'
     const courseId = this.route.snapshot.paramMap.get('id');
 
     if (courseId) {
       this.isLoading = true;
       this.courseService.getCourseById(courseId).subscribe(data => {
         this.course = data;
+        this.editableAmount = data.payment.amount || '';
         this.isLoading = false;
-        
-        // Since data is loaded asynchronously, we might need to re-render
         this.cdr.detectChanges();
-
-        // Initialize the map only after the course data is available
         if (this.mapContainer) {
           this.initMap();
         }
@@ -68,16 +71,14 @@ export class CourseDetailComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // The map is now initialized in ngOnInit after data is loaded
-    // to ensure 'this.course' is available for the popups.
+    // Map initialization handled in ngOnInit after data is loaded
   }
 
   private initMap(): void {
-    // Ensure map is not already initialized
     if (this.map || !this.course) return;
 
-    const startCoords: L.LatLngExpression = [45.7744, 4.8219]; // Écully approximation
-    const endCoords: L.LatLngExpression = [45.7578, 4.8522]; // Lyon 3ème approximation
+    const startCoords: L.LatLngExpression = [45.7744, 4.8219];
+    const endCoords: L.LatLngExpression = [45.7578, 4.8522];
 
     this.map = L.map(this.mapContainer.nativeElement).setView(startCoords, 13);
     
@@ -95,7 +96,7 @@ export class CourseDetailComponent implements OnInit, AfterViewInit {
   }
   
   onHistoryItemClick(item: HistoryItem): void {
-      this.notificationService.show(`Historique: ${item.title} - ${item.details}`);
+    this.notificationService.show(`Historique: ${item.title} - ${item.details}`);
   }
 
   stopCourse(): void {
@@ -110,20 +111,294 @@ export class CourseDetailComponent implements OnInit, AfterViewInit {
   }
 
   assignDriver(): void {
-     if (!this.selectedDriver) {
-        this.notificationService.show('Veuillez sélectionner un chauffeur.');
-        return;
-     }
-     const smsMessage = this.sendSmsDriver ? ' et un SMS sera envoyé.' : '.';
-     this.notificationService.show(`Course assignée à ${this.selectedDriver}${smsMessage}`);
+    if (!this.selectedDriver) {
+      this.notificationService.show('Veuillez sélectionner un chauffeur.');
+      return;
+    }
+    const smsMessage = this.sendSmsDriver ? ' et un SMS sera envoyé.' : '.';
+    this.notificationService.show(`Course assignée à ${this.selectedDriver}${smsMessage}`);
   }
   
   assignCompany(): void {
-      if (!this.selectedCompany) {
-        this.notificationService.show('Veuillez sélectionner une société.');
-        return;
-     }
-     const smsMessage = this.sendSmsCompany ? ' et un SMS sera envoyé.' : '.';
-     this.notificationService.show(`Course assignée à ${this.selectedCompany}${smsMessage}`);
+    if (!this.selectedCompany) {
+      this.notificationService.show('Veuillez sélectionner une société.');
+      return;
+    }
+    const smsMessage = this.sendSmsCompany ? ' et un SMS sera envoyé.' : '.';
+    this.notificationService.show(`Course assignée à ${this.selectedCompany}${smsMessage}`);
+  }
+
+  setActiveTab(tab: 'confirmation' | 'facture'): void {
+    this.activeTab = tab;
+  }
+
+  get isPaymentOverdue(): boolean {
+    if (!this.course || !this.course.payment.invoiceDate || this.course.reference.paymentStatus !== 'En attente') return false;
+    const dueDate = new Date(this.course.payment.invoiceDate);
+    dueDate.setDate(dueDate.getDate() + 30); // 30-day payment term
+    return new Date() > dueDate;
+  }
+
+  toggleEditAmount(): void {
+    this.isEditingAmount = !this.isEditingAmount;
+    if (this.isEditingAmount) {
+      this.editableAmount = this.course?.payment.amount || '';
+    }
+  }
+
+  saveAmount(): void {
+    if (this.course) {
+      this.course.payment.amount = this.editableAmount;
+      this.isEditingAmount = false;
+      this.notificationService.show('Montant mis à jour.');
+      this.cdr.detectChanges();
+    }
+  }
+
+  copyInvoiceDetails(): void {
+    if (!this.course) return;
+    const details = `
+      Facture #${this.course.id}
+      Client: ${this.course.client.name}
+      Email: ${this.course.client.email}
+      Téléphone: ${this.course.client.phone}
+      Date d'Émission: ${(this.course.payment.invoiceDate || this.course.details.creationDate).toLocaleDateString('fr-FR')}
+      Montant: ${this.course.payment.amount || 'Non défini'}
+      Statut: ${this.course.reference.paymentStatus}
+    `.trim();
+    navigator.clipboard.writeText(details);
+    this.notificationService.show('Détails de la facture copiés.');
+  }
+
+  zoomIn(): void {
+    this.pdfHeight += 100;
+    this.cdr.detectChanges();
+  }
+
+  zoomOut(): void {
+    if (this.pdfHeight > 200) {
+      this.pdfHeight -= 100;
+      this.cdr.detectChanges();
+    }
+  }
+
+  generateInvoicePreview(): void {
+    if (!this.course) return;
+
+    const doc = new jsPDF();
+
+    // Header with EasyMove Branding
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 102, 204); // EasyMove blue
+    doc.text('Facture - EasyMove', 105, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text('EasyMove', 20, 35);
+    doc.text('123 Rue de Lyon, 69003 Lyon, France', 20, 42);
+    doc.text('Tél: +33 4 72 34 56 78', 20, 49);
+    doc.text('Email: contact@easymove.fr', 20, 56);
+    doc.text('SIRET: 123 456 789 00012', 20, 63);
+
+    // Invoice Details Table
+    autoTable(doc, {
+      startY: 75,
+      head: [['Facture #', 'Date d\'Émission', 'Client', 'Email']],
+      body: [[
+        this.course.id,
+        (this.course.payment.invoiceDate || this.course.details.creationDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        this.course.client.name,
+        this.course.client.email
+      ]],
+      theme: 'grid',
+      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
+      columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 30 }, 2: { cellWidth: 60 }, 3: { cellWidth: 60 } }
+    });
+
+    // Course Details Table
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      head: [['Description', 'Détails']],
+      body: [
+        ['Trajet', `${this.course.details.from} à ${this.course.details.to}`],
+        ['Ville', this.course.details.city],
+        ['Distance', `${this.course.details.distance} Km`],
+        ['Durée estimée', `${this.course.details.estimatedDuration} min`],
+        ['Véhicule', this.course.details.vehicle],
+        ['Nombre de passagers', `${this.course.client.pax}`],
+        ['Commentaire', this.course.client.comment || 'Aucun'],
+        ['Chauffeur', this.course.reference.driver || 'Non assigné'],
+        ['Société', this.course.reference.company || 'N/A'],
+        ['Statut', this.course.details.status]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
+      columnStyles: { 0: { cellWidth: 60 }, 1: { cellWidth: 120 } }
+    });
+
+    // Payment Details Table
+    const amount = this.course.payment.amount || 'Non défini';
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      head: [['Type de Paiement', 'Statut', 'Montant']],
+      body: [
+        ['Application', this.course.payment.application, ''],
+        ['SOC', this.course.payment.soc, ''],
+        ['Paypal', this.course.payment.paypal || 'N/A', ''],
+        ['', 'Total', amount]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
+      columnStyles: {
+        0: { cellWidth: 60 },
+        1: { cellWidth: 60 },
+        2: { cellWidth: 60, halign: 'right' }
+      },
+      didDrawCell: (data: any) => {
+        if (data.section === 'body' && data.row.index === 3 && data.column.index === 2) {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(0, 102, 204);
+        }
+      }
+    });
+
+    // Terms and Conditions
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    const termsY = (doc as any).lastAutoTable.finalY + 10;
+    doc.text('Conditions de Paiement', 20, termsY);
+    doc.text('• Paiement dû dans les 30 jours suivant la date d\'émission.', 20, termsY + 5);
+    doc.text('• En cas de retard, une pénalité de 1.5% par mois peut être appliquée.', 20, termsY + 10);
+    doc.text('• Contactez-nous pour toute question : contact@easymove.fr', 20, termsY + 15);
+
+    // Thank You Note
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(0, 102, 204);
+    doc.text('Merci de choisir EasyMove pour vos déplacements !', 105, termsY + 30, { align: 'center' });
+
+    // Generate data URL for preview
+    this.pdfPreviewUrl = doc.output('datauristring');
+    this.showPreview = true;
+    this.cdr.detectChanges();
+  }
+
+  downloadInvoice(): void {
+    if (!this.course) return;
+
+    this.isDownloading = true;
+    const doc = new jsPDF();
+
+    // Header with EasyMove Branding
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 102, 204); // EasyMove blue
+    doc.text('Facture - EasyMove', 105, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text('EasyMove', 20, 35);
+    doc.text('123 Rue de Lyon, 69003 Lyon, France', 20, 42);
+    doc.text('Tél: +33 4 72 34 56 78', 20, 49);
+    doc.text('Email: contact@easymove.fr', 20, 56);
+    doc.text('SIRET: 123 456 789 00012', 20, 63);
+
+    // Invoice Details Table
+    autoTable(doc, {
+      startY: 75,
+      head: [['Facture #', 'Date d\'Émission', 'Client', 'Email']],
+      body: [[
+        this.course.id,
+        (this.course.payment.invoiceDate || this.course.details.creationDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        this.course.client.name,
+        this.course.client.email
+      ]],
+      theme: 'grid',
+      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
+      columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 30 }, 2: { cellWidth: 60 }, 3: { cellWidth: 60 } }
+    });
+
+    // Course Details Table
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      head: [['Description', 'Détails']],
+      body: [
+        ['Trajet', `${this.course.details.from} à ${this.course.details.to}`],
+        ['Ville', this.course.details.city],
+        ['Distance', `${this.course.details.distance} Km`],
+        ['Durée estimée', `${this.course.details.estimatedDuration} min`],
+        ['Véhicule', this.course.details.vehicle],
+        ['Nombre de passagers', `${this.course.client.pax}`],
+        ['Commentaire', this.course.client.comment || 'Aucun'],
+        ['Chauffeur', this.course.reference.driver || 'Non assigné'],
+        ['Société', this.course.reference.company || 'N/A'],
+        ['Statut', this.course.details.status]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
+      columnStyles: { 0: { cellWidth: 60 }, 1: { cellWidth: 120 } }
+    });
+
+    // Payment Details Table
+    const amount = this.course.payment.amount || 'Non défini';
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      head: [['Type de Paiement', 'Statut', 'Montant']],
+      body: [
+        ['Application', this.course.payment.application, ''],
+        ['SOC', this.course.payment.soc, ''],
+        ['Paypal', this.course.payment.paypal || 'N/A', ''],
+        ['', 'Total', amount]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontStyle: 'bold' },
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
+      columnStyles: {
+        0: { cellWidth: 60 },
+        1: { cellWidth: 60 },
+        2: { cellWidth: 60, halign: 'right' }
+      },
+      didDrawCell: (data: any) => {
+        if (data.section === 'body' && data.row.index === 3 && data.column.index === 2) {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(0, 102, 204);
+        }
+      }
+    });
+
+    // Terms and Conditions
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    const termsY = (doc as any).lastAutoTable.finalY + 10;
+    doc.text('Conditions de Paiement', 20, termsY);
+    doc.text('• Paiement dû dans les 30 jours suivant la date d\'émission.', 20, termsY + 5);
+    doc.text('• En cas de retard, une pénalité de 1.5% par mois peut être appliquée.', 20, termsY + 10);
+    doc.text('• Contactez-nous pour toute question : contact@easymove.fr', 20, termsY + 15);
+
+    // Thank You Note
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(0, 102, 204);
+    doc.text('Merci de choisir EasyMove pour vos déplacements !', 105, termsY + 30, { align: 'center' });
+
+    // Save the PDF
+    doc.save(`facture_${this.course.id}.pdf`);
+    this.notificationService.show('Facture téléchargée.');
+    this.isDownloading = false;
+    this.cdr.detectChanges();
+  }
+
+  closePreview(): void {
+    this.showPreview = false;
+    this.pdfPreviewUrl = null;
+    this.pdfHeight = 500; // Reset zoom
   }
 }

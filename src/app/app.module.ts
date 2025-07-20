@@ -9,30 +9,26 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { ForgotpasswordComponent } from './forgotpassword/forgotpassword.component';
-import { DetailcourseComponent } from './detailcourse/detailcourse.component';
-import { DetailchauffeurComponent } from './detailchauffeur/detailchauffeur.component';
 import { HomeComponent } from './home/home.component';
 import { PaymentComponent } from './payment/payment.component';
 import { NavbarComponent } from './navbar/navbar.component';
 // Correct the casing for EditTripComponent
-import { EditTripComponent } from './edittrip/edittrip.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
 import { DriverProfileComponent } from './driver-profile/driver-profile.component';
 import { CourseDetailComponent } from './course-detail/course-detail.component';
+import { CardInformationComponent } from './card-information/card-information.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     ForgotpasswordComponent,
-    DetailcourseComponent,
-    DetailchauffeurComponent,
     HomeComponent,
     PaymentComponent,
    
-    // Ensure the name here matches the imported class name
-    EditTripComponent,
     BookingFormComponent,
+    CardInformationComponent,
     
   ],
   imports: [
@@ -42,7 +38,8 @@ import { CourseDetailComponent } from './course-detail/course-detail.component';
     HttpClientModule,    DriverProfileComponent,    CourseDetailComponent,
 
 
-    AppRoutingModule
+    AppRoutingModule,
+      BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

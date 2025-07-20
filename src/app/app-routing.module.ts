@@ -2,8 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
-import { EditTripComponent } from './edittrip/edittrip.component';
-import { DetailcourseComponent } from './detailcourse/detailcourse.component';
 import { PaymentComponent } from './payment/payment.component';
 import { BookingFormComponent } from './booking-form/booking-form.component';
 import { DriverProfileComponent } from './driver-profile/driver-profile.component';
@@ -14,15 +12,17 @@ const routes: Routes = [
   { 
     path: 'course/:id', // <-- Changed from 'b' to include a dynamic ID
     component: CourseDetailComponent 
-  },  { path: 'c', component: PaymentComponent }, // <app-home>
+  }, 
+  
+  { path: 'c', component: PaymentComponent }, // <app-home>
   { path: 'chauffeurs', component: DriverProfileComponent }, // <app-home>
   
   { path: 'home', component: HomeComponent }, // <app-home>
-    { path: 'trips/edit/:id', component: EditTripComponent }, // <-- Add this route
+ 
   { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: 'login', component: LoginComponent },
 
- // { path: '**', redirectTo: 'login' }
+ //{ path: '**', redirectTo: 'home' }
 ];
 
 @NgModule({

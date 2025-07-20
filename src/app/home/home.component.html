@@ -1,45 +1,8 @@
 <app-navbar></app-navbar>
 
 <div class="container-fluid py-3">
-  <!-- Stat Boxes Row -->
-  <div class="row">
-    <div class="col-6 col-md-4 col-lg-2 mb-3">
-      <div class="stat-box bg-devis h-100">
-        <h3>Devis <span class="badge bg-light text-dark ms-1">3</span></h3>
-        <p>Dépasser 3 | Maintien Aujourd'hui Rest.</p>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2 mb-3">
-      <div class="stat-box bg-non-vendu h-100">
-        <h3>Non Vendu <span class="badge bg-light text-dark ms-1">39</span></h3>
-        <p>Dépasser 27 | Maintien 1 | Aujourd'hui Rest 11</p>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2 mb-3">
-      <div class="stat-box bg-en-attente h-100">
-        <h3>En Attente <span class="badge bg-light text-dark ms-1">10</span></h3>
-        <p>Envoyer 10 | Copier Imméd 2 | Réserv 8</p>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2 mb-3">
-      <div class="stat-box bg-en-cours h-100">
-        <h3>En Cours <span class="badge bg-light text-dark ms-1">99</span></h3>
-        <p>App 40 | Soc 59 | À régler 84</p>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2 mb-3">
-      <div class="stat-box bg-terminee h-100">
-        <h3>Terminée <span class="badge bg-light text-dark ms-1">77</span></h3>
-        <p>App 27 | Soc 50</p>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2 mb-3">
-      <div class="stat-box bg-annulee h-100">
-        <h3>Annulée <span class="badge bg-light text-dark ms-1">67</span></h3>
-        <p>Imméd 56 | Réserv 11</p>
-      </div>
-    </div>
-  </div>
+<app-card-information></app-card-information>
+  
 
   <!-- Tabs and Create Button Container -->
   <div class="d-flex justify-content-between align-items-center mt-3">
@@ -109,7 +72,7 @@
                 <td class="table-actions">
                   <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="openModal(trip)"><i class="fas fa-eye"></i></button>
                   <button class="btn btn-sm btn-outline-danger" title="Annuler"><i class="fas fa-times"></i></button>
-                  <button class="btn btn-sm btn-outline-success" title="Modifier" [routerLink]="['/trips/edit', trip.id]">
+                  <button class="btn btn-sm btn-outline-success" title="Modifier" [routerLink]="['/course', trip.id]">
                     <i class="fas fa-pencil-alt"></i>
                   </button>
                 </td>

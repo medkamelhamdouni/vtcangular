@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { TripService } from '../services/trip.service'; // 👈 Import the service
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-booking-form',
@@ -7,93 +9,76 @@ import { FormBuilder, FormGroup } from '@angular/forms';
   styleUrls: ['./booking-form.component.css']
 })
 export class BookingFormComponent implements OnInit {
-  // Define the form group
   bookingForm!: FormGroup;
 
-  // Data for select dropdowns (can be fetched from an API)
+  // Example dropdowns
   courseTypes = ['Intermédiaire', 'Immédiate', 'Planifiée'];
-  missionTypes = ['Course M', 'Course S', 'Course L'];
-  vehicleTypes = ['Tout type', 'Sedan', 'Van', 'Électrique'];
-  passengerOptions = [1, 2, 3, 4];
   paymentMethods = ['Espèces', 'Carte bancaire', 'PayPal', 'Apple Pay'];
-  tripTypes = ['A: Normal', 'B: Prioritaire', 'C: Économique'];
   drivers = ['Toumani Traore', 'Amina Diallo', 'Jean Dupont'];
-  reasons = ['Urgence', 'Préférence client', 'Autre'];
 
-
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder, private tripService: TripService , private router: Router 
+) {} // 👈 Inject the service
 
   ngOnInit(): void {
-    // Initialize the form with FormBuilder
     this.bookingForm = this.fb.group({
-      // Primary Action Row
       courseType: ['Intermédiaire'],
-      missionType: ['Course M'],
-
-      // Address Section
-      departureAddress: ['118 Rue Marietton, 69130 Écully, France'],
-      departurePostalCode: ['69130'],
-      departureCountry: ['Paris'],
-      arrivalAddress: ['28 Rue de la Bannière, 69003 Lyon, France'],
-      arrivalPostalCode: ['69003'],
-
-      // Client Info Section
-      clientName: ['Jean Dupont'],
-      primaryPhone: ['+33612345678'],
-      secondaryPhone: ['+33698765432'],
-
-      // Vehicle and Trip Details
-      vehicleType: ['Tout type'],
-      passengerCount: [1],
+      departureAddress: [''],
+      departurePostalCode: [''],
+      departureCountry: [''],
+      arrivalAddress: [''],
+      arrivalPostalCode: [''],
       roundTrip: [false],
-      waitingTime: [''],
-      handicapAccess: [false],
-      babySeat: [false],
-
-      // Payment and Comments
+      clientName: [''],
+      primaryPhone: [''],
+      secondaryPhone: [''],
       paymentMethod: ['Espèces'],
-      costGBP: [12.50],
-      costEUR: [15.00],
-      tripType: ['A: Normal'],
-      comment: ['Préférer un véhicule électrique, siège bébé requis.'],
-
-      // Action Buttons and Driver Assignment
-      assignTo: [''],
-      clientEmail: ['client@example.com'],
-      internalNote: ['Confirmation SMS requise'],
-      reason: [''],
+      costEUR: [0],
+      internalNote: [''],
+      comment: [''],
+      assignTo: ['']
     });
   }
 
-  // Methods to handle form actions
-  goDispatch(): void {
-    console.log('Dispatch started!', this.bookingForm.value);
-    // Add dispatch logic here
-  }
-
-  loadData(): void {
-    console.log('Reloading data...');
-    // Add API call to reload data here
-    alert('Données rechargées !');
-  }
-
   onSubmit(): void {
-    // This is called when the form is submitted (e.g., "Envoyer" button)
     if (this.bookingForm.valid) {
-      console.log('Form Submitted!', this.bookingForm.value);
-      alert('Demande envoyée avec succès !');
-      // Add logic to send data to the server
+      const form = this.bookingForm.value;
+
+      const payload = {
+        from: form.departureAddress,
+        fromzip: form.departurePostalCode,
+        destination: form.arrivalAddress,
+        destinationzip: form.arrivalPostalCode,
+        alleretour: form.roundTrip,
+        nomclient: form.clientName,
+        date: new Date(), // Or use a date picker field
+        telephone: form.primaryPhone,
+        telephonesec: form.secondaryPhone,
+        chauffeurId: form.assignTo || '',
+        dispatcherId: '',
+        receptionisteId: '',
+        prix: form.costEUR.toString(),
+        note: form.internalNote,
+        commentaire: form.comment,
+        typecourse: form.courseType,
+        typepayment: form.paymentMethod
+      };
+
+      this.tripService.addTrip(payload).subscribe({
+  next: (res) => {
+    console.log('Trip created successfully', res);
+    alert('Course ajoutée avec succès !');
+    this.bookingForm.reset();
+
+    this.router.navigate(['/home']); // ✅ Redirect to /home
+  },
+  error: (err) => {
+    console.error('Erreur:', err);
+    alert('Erreur lors de l\'envoi.');
+  }
+});
+
     } else {
-      console.error('Form is invalid.');
+      alert('Formulaire invalide');
     }
   }
-
-  cancelTrip(): void {
-    console.log('Trip cancelled.');
-    alert('Course annulée !');
-    this.bookingForm.reset(); // Optionally reset the form
-  }
-  
-  // You can create similar methods for other buttons like:
-  // sendQuote(), markAsNotSold(), assignDriver(), etc.
 }
