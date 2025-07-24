@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Roboto:wght@300;400;700&display=swap');
+
+:root {
+  --brand-color: #d1a36a;
+  --dark-color: #1a1814;
+  --light-gray: #f8f9fa;
+  --accent-gradient: linear-gradient(45deg, #d1a36a, #f4c68d);
+}
+
+.section {
+  background: #fff;
+  padding: 60px 0;
+}
+
+h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: var(--dark-color);
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: var(--dark-color);
+  font-size: 1.5rem;
+}
+
+.card-text {
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  font-size: 1rem;
+}
+
+@media (max-width: 576px) {
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+  }
+
+  .card-title {
+    font-size: 1.3rem;
+  }
+
+  .card-text {
+    font-size: 0.9rem;
+  }
+}

@@ -30,7 +30,7 @@
       </li>
     </ul>
     <!-- NEW: Create Course Button -->
-    <a class="btn btn-success" [routerLink]="['/createtrip']">
+    <a class="btn btn-success" [routerLink]="['/createtrip']" *ngIf="userRole === 'receptioniste'">
         <i class="fas fa-plus me-2"></i>Créer une course
     </a>
   </div>

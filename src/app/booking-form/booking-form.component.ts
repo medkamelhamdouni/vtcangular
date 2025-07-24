@@ -69,7 +69,7 @@ export class BookingFormComponent implements OnInit {
     alert('Course ajoutée avec succès !');
     this.bookingForm.reset();
 
-    this.router.navigate(['/home']); // ✅ Redirect to /home
+    this.router.navigate(['/admin']); // ✅ Redirect to /admin
   },
   error: (err) => {
     console.error('Erreur:', err);

@@ -22,6 +22,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   public searchTerm = '';
   private sortColumn = 'date';
   private sortDirection = 'asc';
+
+  // ✅ Property to store the user's role
+  public userRole: string | null = null;
   
   // Reference to the modal element in the template
   @ViewChild('courseDetailsModal') modalElement!: ElementRef;
@@ -30,6 +33,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
+    // ✅ Get the user's role from localStorage when the component initializes
+    this.userRole = localStorage.getItem('role');
     this.fetchTrips();
   }
 

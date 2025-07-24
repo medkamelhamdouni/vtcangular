@@ -1,10 +1,9 @@
-// navbar.component.ts
 import { Component, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { Dropdown } from 'bootstrap'; // Import Bootstrap's Dropdown class
+import { Dropdown } from 'bootstrap';
 
 @Component({
   selector: 'app-navbar',
@@ -31,6 +30,9 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkAuthStatus();
+    if (!this.isLoggedIn) {
+      this.router.navigate(['/login']);
+    }
     this.isDarkTheme = localStorage.getItem('theme') === 'dark';
     document.body.classList.toggle('dark-theme', this.isDarkTheme);
 
@@ -38,13 +40,15 @@ export class NavbarComponent implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.checkAuthStatus();
+      if (!this.isLoggedIn) {
+        this.router.navigate(['/login']);
+      }
       this.closeDropdown();
       this.cdr.detectChanges();
     });
   }
 
   ngAfterViewInit(): void {
-    // Initialize Bootstrap dropdowns
     if (this.toolsDropdown) {
       this.dropdownInstances.push(new Dropdown(this.toolsDropdown.nativeElement));
     }
@@ -74,7 +78,7 @@ export class NavbarComponent implements OnInit {
   }
 
   preventDefault(event: Event): void {
-    event.preventDefault(); // Prevent default anchor behavior for dropdown toggle
+    event.preventDefault();
   }
 
   closeDropdown(): void {
@@ -91,7 +95,6 @@ export class NavbarComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    // Clean up dropdown instances
     this.dropdownInstances.forEach(dropdown => dropdown.dispose());
   }
 }

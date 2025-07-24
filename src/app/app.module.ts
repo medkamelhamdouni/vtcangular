@@ -18,6 +18,10 @@ import { DriverProfileComponent } from './driver-profile/driver-profile.componen
 import { CourseDetailComponent } from './course-detail/course-detail.component';
 import { CardInformationComponent } from './card-information/card-information.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BookingComponent } from './booking/booking.component';
+import { AboutComponent } from './about/about.component';
+import { ServicessComponent } from './servicess/servicess.component';
+import { ContactComponent } from './contact/contact.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +33,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
    
     BookingFormComponent,
     CardInformationComponent,
+    BookingComponent,
+    AboutComponent,
+    ServicessComponent,
+    ContactComponent,
     
   ],
   imports: [

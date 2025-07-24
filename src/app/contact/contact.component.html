@@ -1,0 +1,55 @@
+<section id="contact" class="section py-5">
+  <div class="container">
+    <h2 class="text-center mb-4 animate__animated animate__fadeInUp">Contactez-Nous</h2>
+    <div class="row">
+      <div class="col-lg-6 mx-auto animate__animated animate__fadeInUp animate__delay-1s">
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" novalidate>
+          <div class="mb-3">
+            <label for="name" class="form-label">Nom</label>
+            <input type="text" class="form-control" id="name" formControlName="name" placeholder="Entrez votre nom" [ngClass]="{'is-invalid': contactForm.get('name')?.touched && contactForm.get('name')?.invalid}">
+            <div class="invalid-feedback" *ngIf="contactForm.get('name')?.hasError('required') && contactForm.get('name')?.touched">
+              Veuillez entrer votre nom.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" formControlName="email" placeholder="Entrez votre email" [ngClass]="{'is-invalid': contactForm.get('email')?.touched && contactForm.get('email')?.invalid}">
+            <div class="invalid-feedback" *ngIf="contactForm.get('email')?.hasError('required') && contactForm.get('email')?.touched">
+              Veuillez entrer un email.
+            </div>
+            <div class="invalid-feedback" *ngIf="contactForm.get('email')?.hasError('email') && contactForm.get('email')?.touched">
+              Veuillez entrer un email valide.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="message" class="form-label">Message</label>
+            <textarea class="form-control" id="message" formControlName="message" rows="5" placeholder="Entrez votre message" [ngClass]="{'is-invalid': contactForm.get('message')?.touched && contactForm.get('message')?.invalid}"></textarea>
+            <div class="invalid-feedback" *ngIf="contactForm.get('message')?.hasError('required') && contactForm.get('message')?.touched">
+              Veuillez entrer un message.
+            </div>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-warning btn-lg" id="contact-submit" [disabled]="contactForm.invalid">Envoyer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="contactConfirmationModal" tabindex="-1" aria-labelledby="contactConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="contactConfirmationModalLabel">Message Envoyé</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Votre message a été envoyé avec succès ! Nous vous répondrons bientôt.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

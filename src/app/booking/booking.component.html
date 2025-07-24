@@ -1,0 +1,186 @@
+<header class="header fixed-top">
+  <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+    <div class="container">
+      <a class="navbar-brand" href="#" aria-label="Chauffeur Belg Home"><strong>EasyMove</strong></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link " href="#home" aria-current="page">Accueil</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#about">À Propos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#services">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#contact">Contact</a>
+          </li>
+          <li class="nav-item ms-lg-3">
+            <a class="btn btn-book-now" href="#booking">RÉSERVEZ MAINTENANT</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main class="hero-section" id="home" id="main-content">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6 text-white animate__animated animate__fadeInUp">
+        <p class="text-uppercase small-heading">Réservation Chauffeur Bruxelles</p>
+        <h1 class="display-3 fw-bold">RÉSERVEZ VOTRE CHAUFFEUR À BRUXELLES EN QUELQUES CLICS</h1>
+        <p class="lead my-4">Service de chauffeur professionnel disponible 24h/24 et 7j/7 à Bruxelles. Voyagez en toute sérénité.</p>
+        <a href="tel:+3223185288" class="btn btn-success btn-phone" aria-label="Call to book">
+          <i class="fas fa-phone-alt me-2"></i> +32 2 318 52 88
+        </a>
+      </div>
+
+      <div class="col-lg-5 offset-lg-1" id="booking">
+        <div class="booking-form p-4 shadow animate__animated animate__fadeInRight">
+          <ul class="nav nav-pills nav-fill mb-4" id="pills-tab" role="tablist" aria-label="Booking type selection">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="pills-one-way-tab" data-bs-toggle="pill" data-bs-target="#pills-one-way" type="button" role="tab" aria-controls="pills-one-way" aria-selected="true">Aller simple</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="pills-round-trip-tab" data-bs-toggle="pill" data-bs-target="#pills-round-trip" type="button" role="tab" aria-controls="pills-round-trip" aria-selected="false">Aller-retour</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-one-way" role="tabpanel" aria-labelledby="pills-one-way-tab">
+              <form [formGroup]="oneWayForm" (ngSubmit)="onSubmit(oneWayForm, 'one-way-form')" novalidate>
+                <div class="mb-3 position-relative">
+                  <label for="from" class="form-label text-dark">Lieu de prise en charge</label>
+                  <input type="text" class="form-control" id="from" formControlName="from" placeholder="Entrez l'adresse" data-bs-toggle="tooltip" title="Entrez une adresse à Bruxelles" [ngClass]="{'is-invalid': oneWayForm.get('from')?.touched && oneWayForm.get('from')?.invalid}">
+                  <div class="autocomplete-suggestions" *ngIf="fromSuggestions.length > 0">
+                    <div *ngFor="let suggestion of fromSuggestions" class="autocomplete-suggestion" (click)="selectSuggestion('from', suggestion, oneWayForm)">{{ suggestion }}</div>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="oneWayForm.get('from')?.hasError('required') && oneWayForm.get('from')?.touched">
+                    Veuillez entrer une adresse valide.
+                  </div>
+                </div>
+                <div class="mb-3 position-relative">
+                  <label for="destination" class="form-label text-dark">Destination</label>
+                  <input type="text" class="form-control" id="destination" formControlName="destination" placeholder="Entrez l'adresse" data-bs-toggle="tooltip" title="Entrez une destination valide" [ngClass]="{'is-invalid': oneWayForm.get('destination')?.touched && oneWayForm.get('destination')?.invalid}">
+                  <div class="autocomplete-suggestions" *ngIf="destinationSuggestions.length > 0">
+                    <div *ngFor="let suggestion of destinationSuggestions" class="autocomplete-suggestion" (click)="selectSuggestion('destination', suggestion, oneWayForm)">{{ suggestion }}</div>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="oneWayForm.get('destination')?.hasError('required') && oneWayForm.get('destination')?.touched">
+                    Veuillez entrer une destination valide.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="date" class="form-label text-dark">Date et heure de départ</label>
+                  <input type="datetime-local" class="form-control" id="date" formControlName="date" data-bs-toggle="tooltip" title="Sélectionnez la date et l'heure de votre trajet" [ngClass]="{'is-invalid': oneWayForm.get('date')?.touched && oneWayForm.get('date')?.invalid}">
+                  <div class="invalid-feedback" *ngIf="oneWayForm.get('date')?.hasError('required') && oneWayForm.get('date')?.touched">
+                    Veuillez sélectionner une date et heure valides.
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <label for="telephone" class="form-label text-dark">Numéro de téléphone</label>
+                  <div class="input-group">
+                    <input #phoneInput type="tel" class="form-control" id="telephone" formControlName="telephone" placeholder="Ex: 2 318 52 88" data-bs-toggle="tooltip" title="Entrez votre numéro pour confirmation" [ngClass]="{'is-invalid': oneWayForm.get('telephone')?.touched && oneWayForm.get('telephone')?.invalid}">
+                    <div class="invalid-feedback" *ngIf="oneWayForm.get('telephone')?.hasError('required') && oneWayForm.get('telephone')?.touched">
+                      Veuillez entrer un numéro de téléphone valide.
+                    </div>
+                    <div class="invalid-feedback" *ngIf="oneWayForm.get('telephone')?.hasError('pattern') && oneWayForm.get('telephone')?.touched">
+                      Le numéro doit contenir entre 8 et 12 chiffres.
+                    </div>
+                    <div class="invalid-feedback" *ngIf="oneWayForm.get('telephone')?.hasError('invalidNumber') && oneWayForm.get('telephone')?.touched">
+                      Veuillez entrer un numéro de téléphone valide.
+                    </div>
+                  </div>
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-warning btn-lg" id="one-way-submit" #oneWaySubmitBtn [disabled]="oneWayForm.invalid">Commander</button>
+                </div>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="pills-round-trip" role="tabpanel" aria-labelledby="pills-round-trip-tab">
+              <form [formGroup]="roundTripForm" (ngSubmit)="onSubmit(roundTripForm, 'round-trip-form')" novalidate>
+                <div class="mb-3 position-relative">
+                  <label for="from-round" class="form-label text-dark">Lieu de prise en charge</label>
+                  <input type="text" class="form-control" id="from-round" formControlName="from" placeholder="Entrez l'adresse" data-bs-toggle="tooltip" title="Entrez une adresse à Bruxelles" [ngClass]="{'is-invalid': roundTripForm.get('from')?.touched && roundTripForm.get('from')?.invalid}">
+                  <div class="autocomplete-suggestions" *ngIf="fromRoundSuggestions.length > 0">
+                    <div *ngFor="let suggestion of fromRoundSuggestions" class="autocomplete-suggestion" (click)="selectSuggestion('from-round', suggestion, roundTripForm)">{{ suggestion }}</div>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="roundTripForm.get('from')?.hasError('required') && roundTripForm.get('from')?.touched">
+                    Veuillez entrer une adresse valide.
+                  </div>
+                </div>
+                <div class="mb-3 position-relative">
+                  <label for="destination-round" class="form-label text-dark">Destination</label>
+                  <input type="text" class="form-control" id="destination-round" formControlName="destination" placeholder="Entrez l'adresse" data-bs-toggle="tooltip" title="Entrez une destination valide" [ngClass]="{'is-invalid': roundTripForm.get('destination')?.touched && roundTripForm.get('destination')?.invalid}">
+                  <div class="autocomplete-suggestions" *ngIf="destinationRoundSuggestions.length > 0">
+                    <div *ngFor="let suggestion of destinationRoundSuggestions" class="autocomplete-suggestion" (click)="selectSuggestion('destination-round', suggestion, roundTripForm)">{{ suggestion }}</div>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="roundTripForm.get('destination')?.hasError('required') && roundTripForm.get('destination')?.touched">
+                    Veuillez entrer une destination valide.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="departure-date" class="form-label text-dark">Date et heure de départ</label>
+                  <input type="datetime-local" class="form-control" id="departure-date" formControlName="departureDate" data-bs-toggle="tooltip" title="Sélectionnez la date et l'heure de départ" [ngClass]="{'is-invalid': roundTripForm.get('departureDate')?.touched && roundTripForm.get('departureDate')?.invalid}">
+                  <div class="invalid-feedback" *ngIf="roundTripForm.get('departureDate')?.hasError('required') && roundTripForm.get('departureDate')?.touched">
+                    Veuillez sélectionner une date et heure valides.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="return-date" class="form-label text-dark">Date et heure de retour</label>
+                  <input type="datetime-local" class="form-control" id="return-date" formControlName="returnDate" data-bs-toggle="tooltip" title="Sélectionnez la date et l'heure de retour" [ngClass]="{'is-invalid': roundTripForm.get('returnDate')?.touched && roundTripForm.get('returnDate')?.invalid}">
+                  <div class="invalid-feedback" *ngIf="roundTripForm.get('returnDate')?.hasError('required') && roundTripForm.get('returnDate')?.touched">
+                    Veuillez sélectionner une date et heure valides.
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <label for="telephone-round" class="form-label text-dark">Numéro de téléphone</label>
+                  <div class="input-group">
+                    <input #phoneInputRound type="tel" class="form-control" id="telephone-round" formControlName="telephone" placeholder="Ex: 2 318 52 88" data-bs-toggle="tooltip" title="Entrez votre numéro pour confirmation" [ngClass]="{'is-invalid': roundTripForm.get('telephone')?.touched && roundTripForm.get('telephone')?.invalid}">
+                    <div class="invalid-feedback" *ngIf="roundTripForm.get('telephone')?.hasError('required') && roundTripForm.get('telephone')?.touched">
+                      Veuillez entrer un numéro de téléphone valide.
+                    </div>
+                    <div class="invalid-feedback" *ngIf="roundTripForm.get('telephone')?.hasError('pattern') && roundTripForm.get('telephone')?.touched">
+                      Le numéro doit contenir entre 8 et 12 chiffres.
+                    </div>
+                    <div class="invalid-feedback" *ngIf="roundTripForm.get('telephone')?.hasError('invalidNumber') && roundTripForm.get('telephone')?.touched">
+                      Veuillez entrer un numéro de téléphone valide.
+                    </div>
+                  </div>
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-warning btn-lg" id="round-trip-submit" #roundTripSubmitBtn [disabled]="roundTripForm.invalid">Commander</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="#booking" class="sticky-book-btn d-lg-none">Réserver</a>
+</main>
+
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Réservation Confirmée</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Votre réservation a été envoyée avec succès ! Vous recevrez une confirmation bientôt.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-about></app-about>
+<app-servicess></app-servicess>
+<app-contact></app-contact>
