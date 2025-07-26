@@ -9,7 +9,7 @@
 
 .section {
   padding: 100px 0;
-   background: linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%), url('/assets/image2.jpg') center center;
+   background: linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%), url('https://medkamelhamdouni.github.io/vtcangular/assets/image2.jpg') center center;
   background-size: cover;
   color: white;
 }

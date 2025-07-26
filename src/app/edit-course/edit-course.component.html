@@ -1,0 +1,272 @@
+<app-navbar></app-navbar>
+
+<div class="container-fluid py-3">
+  <div class="container-fluid mt-3">
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="fas fa-edit me-2 text-primary"></i>Modifier la Course</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Type de course</label>
+                  <select class="form-select" formControlName="courseType" aria-label="Type de course">
+                    <option value="" disabled>Sélectionner...</option>
+                    <option *ngFor="let type of courseTypes" [value]="type">{{ type }}</option>
+                  </select>
+                  <div *ngIf="editForm.get('courseType')?.invalid && editForm.get('courseType')?.touched" class="text-danger small">
+                    Type de course requis.
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">État de la course</label>
+                  <select class="form-select" formControlName="courseStatus" aria-label="État de la course">
+                    <option value="" disabled>Sélectionner...</option>
+                    <option *ngFor="let status of courseStatuses" [value]="status">{{ status }}</option>
+                  </select>
+                  <div *ngIf="editForm.get('courseStatus')?.invalid && editForm.get('courseStatus')?.touched" class="text-danger small">
+                    État de la course requis.
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Date et heure</label>
+                  <div class="row g-2">
+                    <div class="col-md-6">
+                      <input type="text" class="form-control" bsDatepicker formControlName="date" [bsConfig]="{ dateInputFormat: 'YYYY-MM-DD', containerClass: 'theme-default' }" placeholder="Sélectionner la date" aria-label="Date de la course">
+                      <div *ngIf="editForm.get('date')?.invalid && editForm.get('date')?.touched" class="text-danger small">
+                        Date requise.
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <input type="time" class="form-control" formControlName="time" aria-label="Heure de la course">
+                      <div *ngIf="editForm.get('time')?.invalid && editForm.get('time')?.touched" class="text-danger small">
+                        Heure requise.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="fas fa-route me-2 text-primary"></i>Itinéraire</h5>
+            </div>
+            <div class="card-body">
+              <h6>Départ</h6>
+              <div class="row g-3 mb-3">
+                <div class="col-md-7">
+                  <input type="text" class="form-control" formControlName="departureAddress" placeholder="Adresse de départ" aria-label="Adresse de départ">
+                  <div *ngIf="editForm.get('departureAddress')?.invalid && editForm.get('departureAddress')?.touched" class="text-danger small">
+                    Adresse de départ requise.
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <input type="text" class="form-control" formControlName="departurePostalCode" placeholder="Code postal" aria-label="Code postal de départ">
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" formControlName="departureCountry" placeholder="Pays" aria-label="Pays de départ">
+                </div>
+              </div>
+              <h6>Arrivée</h6>
+              <div class="row g-3">
+                <div class="col-md-7">
+                  <input type="text" class="form-control" formControlName="arrivalAddress" placeholder="Adresse d'arrivée" aria-label="Adresse d'arrivée">
+                  <div *ngIf="editForm.get('arrivalAddress')?.invalid && editForm.get('arrivalAddress')?.touched" class="text-danger small">
+                    Adresse d'arrivée requise.
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <input type="text" class="form-control" formControlName="arrivalPostalCode" placeholder="Code postal" aria-label="Code postal d'arrivée">
+                </div>
+                <div class="col-md-3 d-flex align-items-center">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="aller-retour" formControlName="roundTrip" aria-label="Aller et retour">
+                    <label class="form-check-label" for="aller-retour">Aller et retour</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="fas fa-user-friends me-2 text-primary"></i>Passager & Véhicule</h5>
+            </div>
+            <div class="card-body">
+              <h6>Informations du Client</h6>
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <input type="text" class="form-control" formControlName="clientName" placeholder="Nom du client" aria-label="Nom du client">
+                </div>
+                <div class="col-md-4">
+                  <div class="input-group">
+                    <input type="text" class="form-control" formControlName="primaryPhone" placeholder="N° de tél principal" aria-label="Numéro de téléphone principal">
+                    <button class="btn btn-outline-secondary" type="button" aria-label="Rechercher"><i class="fas fa-search"></i></button>
+                  </div>
+                  <div *ngIf="editForm.get('primaryPhone')?.invalid && editForm.get('primaryPhone')?.touched" class="text-danger small">
+                    Numéro de téléphone principal requis.
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" class="form-control" formControlName="secondaryPhone" placeholder="2ème N° de tél (optionnel)" aria-label="Numéro de téléphone secondaire">
+                </div>
+                <div class="col-md-4">
+                  <input type="email" class="form-control" formControlName="clientEmail" placeholder="Email du client" aria-label="Email du client">
+                </div>
+                <div class="col-md-4">
+                  <input type="number" class="form-control" formControlName="clientPax" placeholder="Nombre de passagers" aria-label="Nombre de passagers">
+                </div>
+                <div class="col-md-4">
+                  <input type="text" class="form-control" formControlName="clientPreference" placeholder="Préférence du client" aria-label="Préférence du client">
+                </div>
+              </div>
+              <h6>Véhicule</h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <input type="text" class="form-control" formControlName="vehicle" placeholder="Type de véhicule" aria-label="Type de véhicule">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Tarification & Notes</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label">Régler par</label>
+                  <select class="form-select" formControlName="paymentMethod" aria-label="Méthode de paiement">
+                    <option value="" disabled>Sélectionner...</option>
+                    <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Coût (EUR)</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" formControlName="costEUR" aria-label="Coût en euros">
+                    <span class="input-group-text">€</span>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Frais d'application (EUR)</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" formControlName="applicationFees" aria-label="Frais d'application en euros">
+                    <span class="input-group-text">€</span>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Statut du paiement</label>
+                  <select class="form-select" formControlName="paymentStatus" aria-label="Statut du paiement">
+                    <option value="" disabled>Sélectionner...</option>
+                    <option value="Payée">Payée</option>
+                    <option value="En attente">En attente</option>
+                    <option value="Échoué">Échoué</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Paiement Application</label>
+                  <select class="form-select" formControlName="paymentApplication" aria-label="Paiement via application">
+                    <option value="Payée">Payée</option>
+                    <option value="Non payée">Non payée</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Paiement SOC</label>
+                  <select class="form-select" formControlName="paymentSoc" aria-label="Paiement par société">
+                    <option value="Payée">Payée</option>
+                    <option value="Non payée">Non payée</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Paiement PayPal</label>
+                  <select class="form-select" formControlName="paymentPaypal" aria-label="Paiement PayPal">
+                    <option value="Payée">Payée</option>
+                    <option value="N/A">N/A</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Note interne (privée)</label>
+                  <input type="text" class="form-control" formControlName="internalNote" aria-label="Note interne">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Commentaire pour le chauffeur</label>
+                  <textarea class="form-control" rows="2" formControlName="comment" aria-label="Commentaire pour le chauffeur"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="fas fa-users-cog me-2 text-primary"></i>Personnel</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">ID du Dispatcher</label>
+                  <input type="text" class="form-control" formControlName="dispatcherId" placeholder="ID du dispatcher" aria-label="ID du dispatcher">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">ID du Réceptionniste</label>
+                  <input type="text" class="form-control" formControlName="receptionisteId" placeholder="ID du réceptionniste" aria-label="ID du réceptionniste">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Société</label>
+                  <input type="text" class="form-control" formControlName="company" placeholder="Nom de la société" aria-label="Nom de la société">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card sticky-top shadow-sm" style="top: 1rem;">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="fas fa-id-card me-2 text-primary"></i>Affectation Chauffeur</h5>
+            </div>
+            <div class="card-body">
+              <p class="text-muted small">Affectez manuellement un chauffeur à cette course ou laissez le système décider.</p>
+              <div class="mb-3">
+                <label for="driver-list" class="form-label">Chauffeurs disponibles</label>
+                <select id="driver-list" class="form-select" formControlName="assignTo" aria-label="Chauffeurs disponibles">
+                  <option value="" selected>Automatique / Non affecté</option>
+                  <option *ngFor="let driver of drivers" [value]="driver">{{ driver }}</option>
+                </select>
+              </div>
+              <div class="d-grid">
+                <button type="button" class="btn btn-primary" (click)="assignDriver()" aria-label="Confirmer l'affectation du chauffeur">
+                  <i class="fas fa-check-circle me-2"></i>Confirmer l'Affectation
+                </button>
+              </div>
+            </div>
+            <div class="mt-4 d-flex justify-content-between align-items-center bg-light p-3 rounded shadow-sm">
+              <div>
+                <button type="submit" class="btn btn-primary btn-lg me-2" [disabled]="isLoading || editForm.invalid" aria-label="Mettre à jour la course">
+                  <i class="fas fa-save me-2"></i>{{ isLoading ? 'Mise à jour...' : 'Mettre à Jour' }}
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-secondary btn-lg" (click)="cancel()" aria-label="Annuler">
+                  <i class="fas fa-times me-2"></i>Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div *ngIf="isLoading && !editForm.value._id" class="alert alert-info m-4" role="alert">
+  Chargement des données de la course...
+</div>
+<div *ngIf="errorMessage" class="alert alert-danger m-4" role="alert">
+  {{ errorMessage }}
+</div>

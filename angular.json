@@ -38,6 +38,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/vtcangular/",
               "budgets": [
                 {
                   "type": "initial",

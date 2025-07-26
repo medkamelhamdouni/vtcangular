@@ -1,5 +1,5 @@
 export interface Trip {
-  id: string;
+  _id: string;
   from: string;
   destination: string;
   date: string; // Or Date, if you plan to convert it upon receipt

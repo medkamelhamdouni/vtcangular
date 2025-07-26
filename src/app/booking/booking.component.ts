@@ -162,16 +162,15 @@ export class BookingComponent implements OnInit, AfterViewInit {
       try {
         const response = await this.http.post('https://www.fraiza.xyz/api/trip/addtrip', data).toPromise();
         console.log('Server Response:', response);
+
         const modalElement = document.getElementById('confirmationModal')!;
-        modalElement.setAttribute('aria-hidden', 'false'); // Ensure modal is not hidden to assistive technologies
+        modalElement.setAttribute('aria-hidden', 'false');
         const modal = new bootstrap.Modal(modalElement);
-        
-        // Apply inert to main content to prevent focus outside modal
+
         if (this.mainContent) {
           this.mainContent.nativeElement.setAttribute('inert', '');
         }
 
-        // Listen for modal close to remove inert attribute
         modalElement.addEventListener('hidden.bs.modal', () => {
           if (this.mainContent) {
             this.mainContent.nativeElement.removeAttribute('inert');
@@ -186,7 +185,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
         const liveRegion = document.createElement('div');
         liveRegion.setAttribute('aria-live', 'polite');
         liveRegion.setAttribute('class', 'visually-hidden');
-        liveRegion.textContent = 'Réservation envoyée avec succès';
+        liveRegion.textContent = '🚖 Course envoyée avec succès ! Nous reviendrons vers vous dans quelques secondes pour confirmation.';
         document.body.appendChild(liveRegion);
         setTimeout(() => liveRegion.remove(), 3000);
       } catch (error) {

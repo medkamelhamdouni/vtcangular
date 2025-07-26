@@ -1,0 +1,13 @@
+<div class="row g-3">
+  <div class="col-6 col-md-4 col-lg-2" *ngFor="let stat of statItems; let i = index">
+    <div class="stat-box" [ngClass]="stat.bgClass" (click)="onCardClick(stat)" role="button" tabindex="0"
+         (keydown.enter)="onCardClick(stat)" [attr.aria-label]="stat.ariaLabel">
+      <div class="stat-box-content">
+        <div class="stat-icon" [ngClass]="stat.iconClass"></div>
+        <h3 class="stat-title">{{ stat.title }} <span class="badge bg-light text-dark ms-1">{{ stats[stat.key] || 0 }}</span></h3>
+        <p class="stat-description">{{ stat.description }}</p>
+      </div>
+      <div class="stat-box-overlay"></div>
+    </div>
+  </div>
+</div>

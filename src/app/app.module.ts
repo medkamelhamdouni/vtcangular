@@ -22,7 +22,11 @@ import { BookingComponent } from './booking/booking.component';
 import { AboutComponent } from './about/about.component';
 import { ServicessComponent } from './servicess/servicess.component';
 import { ContactComponent } from './contact/contact.component';
-
+import { ReclamationComponent } from './reclamation/reclamation.component';
+import { ReclamationStatsComponent } from './reclamation-stats/reclamation-stats.component';
+import { DriverListComponent } from './driver-list/driver-list.component';
+import { EditCourseComponent } from './edit-course/edit-course.component';
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 @NgModule({
   declarations: [
     AppComponent,
@@ -37,7 +41,11 @@ import { ContactComponent } from './contact/contact.component';
     AboutComponent,
     ServicessComponent,
     ContactComponent,
-    
+    ReclamationComponent,
+    ReclamationStatsComponent,
+    DriverListComponent,
+    EditCourseComponent,
+   
   ],
   imports: [
     BrowserModule,
@@ -45,7 +53,7 @@ import { ContactComponent } from './contact/contact.component';
     ReactiveFormsModule, // <-- Add this module
     HttpClientModule,    DriverProfileComponent,    CourseDetailComponent,
 
-
+ BsDatepickerModule.forRoot(),
     AppRoutingModule,
       BrowserAnimationsModule
   ],

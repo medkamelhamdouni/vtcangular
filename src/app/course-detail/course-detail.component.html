@@ -16,8 +16,14 @@
           </div>
           <div class="history-item" role="button" tabindex="0" *ngFor="let item of course.history" (click)="onHistoryItemClick(item)" (keydown.enter)="onHistoryItemClick(item)" aria-label="Détails de l'historique">
             <p class="mb-0 text-muted">{{ item.timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</p>
-            <p class="mb-1">{{ item.title }} <span class="badge" [ngClass]="item.titleBadgeClass">{{ item.titleBadge }}</span></p>
-            <small class="text-muted">{{ item.details }} <span class="badge" [ngClass]="item.statusBadgeClass">{{ item.statusBadge }}</span></small>
+            <p class="mb-1">
+              {{ item.title }}
+              <span class="badge ms-2" [ngClass]="item.titleBadgeClass" title="{{ item.titleBadge }}">{{ item.titleBadge }}</span>
+            </p>
+            <small class="text-muted">
+              {{ item.details }}
+              <span class="badge ms-2" [ngClass]="item.statusBadgeClass" title="{{ item.statusBadge }}">{{ item.statusBadge }}</span>
+            </small>
           </div>
         </div>
       </aside>
@@ -41,20 +47,6 @@
               <div class="col-md-3">
                 <button class="btn btn-primary w-100" (click)="assignDriver()" aria-label="Assigner un chauffeur"><i class="fas fa-user-check"></i> Assigner</button>
               </div>
-              <div class="col-md-3">
-                <label for="affecter-a-select" class="form-label">Affecter Société</label>
-                <select class="form-select" id="affecter-a-select" [(ngModel)]="selectedCompany" aria-label="Sélectionner une société">
-                  <option value="" disabled>Sélectionner...</option>
-                  <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
-                </select>
-                <div class="form-check mt-2">
-                  <input class="form-check-input" type="checkbox" id="smsCheck2" [(ngModel)]="sendSmsCompany">
-                  <label class="form-check-label" for="smsCheck2">Envoyer SMS</label>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <button class="btn btn-info text-white w-100" (click)="assignCompany()" aria-label="Assigner une société"><i class="fas fa-building"></i> Assigner</button>
-              </div>
             </div>
 
             <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
@@ -77,38 +69,24 @@
           <div class="tab-content">
             <!-- Confirmation Tab -->
             <div *ngIf="activeTab === 'confirmation'" class="tab-pane">
-              <div class="row mb-4">
-                <div class="col-md-4">
-                  <strong>Application</strong>
-                  <p [ngClass]="{'text-success': course.payment.application === 'Payée', 'text-danger': course.payment.application === 'Non payée'}">{{ course.payment.application }}</p>
-                </div>
-                <div class="col-md-4">
-                  <strong>SOC</strong>
-                  <p [ngClass]="{'text-success': course.payment.soc === 'Payée', 'text-danger': course.payment.soc === 'Non payée'}">{{ course.payment.soc }}</p>
-                </div>
-                <div class="col-md-4">
-                  <strong>Paypal</strong>
-                  <p>{{ course.payment.paypal }}</p>
-                </div>
-              </div>
-
               <div class="row">
                 <div class="col-md-6">
                   <div class="info-card">
                     <h6 class="info-card-header">Client <i class="fas fa-edit" role="button" title="Modifier" aria-label="Modifier les informations du client"></i></h6>
                     <dl>
-                      <dt>Nom</dt><dd>{{ course.client.name }}</dd>
+                      <dt>Nom</dt><dd>{{ course.client.name || 'Non spécifié' }}</dd>
                       <dt>N° tel</dt><dd>{{ course.client.phone }}</dd>
+                      <dt>N° tel secondaire</dt><dd>{{ course.telephonesec || '-' }}</dd>
                       <dt>N° pax</dt><dd>{{ course.client.pax }}</dd>
                       <dt>Commentaire</dt><dd>{{ course.client.comment || '-' }}</dd>
-                      <dt>Email</dt><dd>{{ course.client.email }}</dd>
+                      <dt>Email</dt><dd>{{ course.client.email || 'Non spécifié' }}</dd>
                       <dt>Préférence</dt><dd>{{ course.client.preference || '-' }}</dd>
                     </dl>
                   </div>
                   <div class="info-card">
                     <h6 class="info-card-header">Référence</h6>
                     <dl>
-                      <dt>Référence ID</dt><dd>{{ course.id }}</dd>
+                      <dt>Référence ID</dt><dd>{{ course._id }}</dd>
                       <dt>Chauffeur</dt><dd>{{ course.reference.driver || 'Non assigné' }}</dd>
                       <dt>Société</dt><dd>{{ course.reference.company || 'N/A' }}</dd>
                       <dt>Paiement</dt><dd>{{ course.reference.paymentStatus }}</dd>
@@ -132,6 +110,7 @@
                       <dt>À</dt><dd>{{ course.details.to }}</dd>
                       <dt>Distance</dt><dd>{{ course.details.distance }} Km</dd>
                       <dt>Durée estimée</dt><dd>{{ course.details.estimatedDuration }} min</dd>
+                      <dt>Type de course</dt><dd>{{ course.typecourse || 'Non spécifié' }}</dd>
                     </dl>
                   </div>
                 </div>
@@ -142,7 +121,7 @@
             <div *ngIf="activeTab === 'facture'" class="tab-pane">
               <div class="invoice-header">
                 <h2 class="text-primary mb-0"><i class="fas fa-file-invoice me-2"></i> Facture - EasyMove</h2>
-                <p class="text-muted">Détails de la facture pour la course #{{ course.id }}</p>
+                <p class="text-muted">Détails de la facture pour la course #{{ course._id }}</p>
               </div>
 
               <div class="row g-4">
@@ -152,15 +131,19 @@
                     <h5 class="invoice-card-title"><i class="fas fa-user me-2"></i> Informations Client</h5>
                     <div class="invoice-field" role="group" aria-label="Nom du client">
                       <span class="field-label"><i class="fas fa-user-circle"></i> Nom</span>
-                      <span class="field-value">{{ course.client.name }}</span>
+                      <span class="field-value">{{ course.client.name || 'Non spécifié' }}</span>
                     </div>
                     <div class="invoice-field" role="group" aria-label="Email du client">
                       <span class="field-label"><i class="fas fa-envelope"></i> Email</span>
-                      <span class="field-value">{{ course.client.email }}</span>
+                      <span class="field-value">{{ course.client.email || 'Non spécifié' }}</span>
                     </div>
                     <div class="invoice-field" role="group" aria-label="Téléphone du client">
                       <span class="field-label"><i class="fas fa-phone"></i> Téléphone</span>
                       <span class="field-value">{{ course.client.phone }}</span>
+                    </div>
+                    <div class="invoice-field" role="group" aria-label="Téléphone secondaire">
+                      <span class="field-label"><i class="fas fa-phone-alt"></i> Téléphone secondaire</span>
+                      <span class="field-value">{{ course.telephonesec || 'Aucun' }}</span>
                     </div>
                     <div class="invoice-field" role="group" aria-label="Nombre de passagers">
                       <span class="field-label"><i class="fas fa-users"></i> Nombre de passagers</span>
@@ -213,11 +196,11 @@
                     <h5 class="invoice-card-title"><i class="fas fa-file-invoice-dollar me-2"></i> Résumé de la Facture</h5>
                     <div class="invoice-field" role="group" aria-label="Référence de la facture">
                       <span class="field-label"><i class="fas fa-hashtag"></i> Référence ID</span>
-                      <span class="field-value">{{ course.id }}</span>
+                      <span class="field-value">{{ course._id }}</span>
                     </div>
                     <div class="invoice-field" role="group" aria-label="Date d'émission">
                       <span class="field-label"><i class="fas fa-calendar-alt"></i> Date d'Émission</span>
-                      <span class="field-value">{{ course.payment.invoiceDate || course.details.creationDate | date: 'dd/MM/yyyy' }}</span>
+                      <span class="field-value">{{ course.payment.invoiceDate | date: 'dd/MM/yyyy' }}</span>
                     </div>
                     <div class="invoice-field" role="group" aria-label="Montant total de la facture">
                       <span class="field-label"><i class="fas fa-euro-sign"></i> Montant Total</span>

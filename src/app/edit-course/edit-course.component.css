@@ -1,0 +1,34 @@
+.card {
+  border-radius: 8px;
+}
+.card-header {
+  font-weight: 500;
+}
+.form-label {
+  font-weight: 500;
+}
+.form-control, .form-select {
+  border-radius: 6px;
+}
+.btn-primary {
+  background-color: #0066cc;
+  border-color: #0066cc;
+}
+.btn-primary:hover {
+  background-color: #005bb5;
+  border-color: #005bb5;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+.btn-secondary:hover {
+  background-color: #5c636a;
+  border-color: #5c636a;
+}
+.sticky-top {
+  z-index: 1000;
+}
+.alert {
+  border-radius: 6px;
+}

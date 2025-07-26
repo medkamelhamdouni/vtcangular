@@ -1,0 +1,108 @@
+<app-navbar></app-navbar>
+
+<div class="container-fluid py-3">
+  <!-- Stats Component (Placeholder, can be implemented later) -->
+  <!-- <app-driver-stats></app-driver-stats> -->
+   <div class="search-bar card">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+          <div class="input-group">
+            <label class="input-group-text" for="search-by"><i class="fas fa-user"></i></label>
+            <input type="text" class="form-control" placeholder="Nom du chauffeur" id="search-by" aria-label="Search by name" [(ngModel)]="searchName" (input)="filterContent()">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="input-group">
+            <label class="input-group-text" for="phone-search"><i class="fas fa-phone"></i></label>
+            <input type="text" class="form-control" placeholder="N° de téléphone" id="phone-search" aria-label="Search by phone" [(ngModel)]="searchPhone" (input)="filterContent()">
+            <button class="btn btn-primary" type="button" (click)="searchByPhone()" aria-label="Search" [disabled]="isSearchingPhone">
+              <i *ngIf="!isSearchingPhone" class="fas fa-search"></i>
+              <i *ngIf="isSearchingPhone" class="fas fa-spinner fa-spin"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="input-group">
+            <label class="input-group-text" for="email-search"><i class="fas fa-envelope"></i></label>
+            <input type="email" class="form-control" placeholder="E-mail" id="email-search" aria-label="Search by email" [(ngModel)]="searchEmail" (input)="filterContent()">
+            <button class="btn btn-primary" type="button" (click)="searchByEmail()" aria-label="Search" [disabled]="isSearchingEmail">
+              <i *ngIf="!isSearchingEmail" class="fas fa-search"></i>
+              <i *ngIf="isSearchingEmail" class="fas fa-spinner fa-spin"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs and Create Button Container -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <ul class="nav nav-tabs" id="driverTabs" role="tablist" style="margin-bottom: -1px;">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#actif" type="button" role="tab"><i class="fas fa-check-circle"></i> Actif</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#inactif" type="button" role="tab"><i class="fas fa-pause-circle"></i> Inactif</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#banned" type="button" role="tab"><i class="fas fa-ban"></i> Banni</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content" id="driverTabsContent">
+    <div class="tab-pane fade show active" id="actif" role="tabpanel">
+      <div class="card card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Chauffeurs Actifs <i class="fas fa-sync-alt ms-2"></i></h4>
+          <form class="d-flex search-form" (submit)="onSearch()">
+            <input class="form-control me-2" type="search" placeholder="Rechercher un chauffeur..." aria-label="Search" [(ngModel)]="searchTerm" (input)="onSearch()" name="search">
+            <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
+          </form>
+        </div>
+
+        <div *ngIf="isLoading" class="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Action</th>
+                <th (click)="sortDrivers('username')">Nom d'utilisateur <i class="fas" [ngClass]="getSortIcon('username')"></i></th>
+                <th (click)="sortDrivers('email')">Email <i class="fas" [ngClass]="getSortIcon('email')"></i></th>
+                <th (click)="sortDrivers('telephone')">Téléphone <i class="fas" [ngClass]="getSortIcon('telephone')"></i></th>
+                <th (click)="sortDrivers('Ville')">Ville <i class="fas" [ngClass]="getSortIcon('Ville')"></i></th>
+                <th (click)="sortDrivers('etat')">État <i class="fas" [ngClass]="getSortIcon('etat')"></i></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="filteredDrivers.length === 0">
+                <td colspan="6">Aucun chauffeur trouvé.</td>
+              </tr>
+              <tr *ngFor="let driver of filteredDrivers; let i = index">
+                <td class="table-actions">
+                  <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="viewDriverDetails(driver._id)"><i class="fas fa-eye"></i></button>
+                </td>
+                <td>{{ driver.username }}</td>
+                <td>{{ driver.email }}</td>
+                <td>{{ driver.telephone || 'N/A' }}</td>
+                <td>{{ driver.Ville }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-success': driver.etat === 'actif',
+                    'bg-warning text-dark': driver.etat === 'inactif',
+                    'bg-danger': driver.isBanned
+                  }">{{ driver.isBanned ? 'Banni' : driver.etat }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="inactif" role="tabpanel"><div class="card card-body">Chauffeurs inactifs content goes here.</div></div>
+    <div class="tab-pane fade" id="banned" role="tabpanel"><div class="card card-body">Chauffeurs bannis content goes here.</div></div>
+  </div>
+</div>

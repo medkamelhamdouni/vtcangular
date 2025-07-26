@@ -54,10 +54,8 @@
             <thead class="table-light">
               <tr>
                 <th>Action</th>
-                <th (click)="sortTrips('date')">Date <i class="fas" [ngClass]="getSortIcon('date')"></i></th>
                 <th (click)="sortTrips('type')">Type <i class="fas" [ngClass]="getSortIcon('type')"></i></th>
                 <th (click)="sortTrips('etat')">État <i class="fas" [ngClass]="getSortIcon('etat')"></i></th>
-                <th (click)="sortTrips('dispatcher')">Dispatchor <i class="fas" [ngClass]="getSortIcon('dispatcher')"></i></th>
                 <th (click)="sortTrips('de')">De <i class="fas" [ngClass]="getSortIcon('de')"></i></th>
                 <th (click)="sortTrips('a')">À <i class="fas" [ngClass]="getSortIcon('a')"></i></th>
                 <th (click)="sortTrips('num')">Num <i class="fas" [ngClass]="getSortIcon('num')"></i></th>
@@ -70,29 +68,23 @@
               </tr>
               <tr *ngFor="let trip of filteredTrips; let i = index">
                 <td class="table-actions">
-                  <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="openModal(trip)"><i class="fas fa-eye"></i></button>
-                  <button class="btn btn-sm btn-outline-danger" title="Annuler"><i class="fas fa-times"></i></button>
-                  <button class="btn btn-sm btn-outline-success" title="Modifier" [routerLink]="['/course', trip.id]">
+                  <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="viewDriverDetails(trip._id)"><i class="fas fa-eye"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" title="Payment" (click)="paypage(trip._id)"><i  class="fas fa-wallet"></i></button>
+                  <button class="btn btn-sm btn-outline-success" title="Modifier"(click)="editDriverDetails(trip._id)">
                     <i class="fas fa-pencil-alt"></i>
                   </button>
                 </td>
-                <td>
-                  {{ trip.date | date:'HH:mm' }}<br>
-                  <strong>{{ trip.date | date:'dd/MM/yyyy' }}</strong><br>
-                  <span class="badge bg-warning text-dark alert-custom">en attente</span>
-                </td>
+              
                 <td>
                   {{ i + 1 }}/{{ allTrips.length }}<br>
                   <span class="badge bg-info text-dark alert-custom">{{ trip.alleretour ? 'Aller-retour' : 'Aller simple' }}</span>
                 </td>
-                <td>
-                  {{ trip.date | date:'HH:mm dd/MM/yyyy' }}<br>
-                  <span class="badge bg-info">réservation</span>
+                 <td>
+                  {{ trip.date | date:'HH:mm' }}<br>
+                  <strong>{{ trip.date | date:'dd/MM/yyyy' }}</strong><br>
+                  <span class="badge bg-warning text-dark alert-custom">en attente</span>
                 </td>
-                <td>
-                  {{ trip.dispatcherId || 'R' + (100 + i) }}<br>
-                  <button class="btn btn-sm je-gere-btn">Je gère</button>
-                </td>
+              
                 <td>{{ trip.from }}</td>
                 <td>{{ trip.destination }}</td>
                 <td>{{ trip.telephone }}</td>
@@ -130,7 +122,7 @@
                 </div>
                 <div class="col-md-6">
                   <dt class="col-sm-4">Prix annoncé</dt><dd class="col-sm-8">{{ selectedTrip.prix | currency:'EUR' }}</dd>
-                  <dt class="col-sm-4">Mission</dt><dd class="col-sm-8">ref-{{selectedTrip.id}}</dd>
+                  <dt class="col-sm-4">Mission</dt><dd class="col-sm-8">ref-{{selectedTrip._id}}</dd>
                   <dt class="col-sm-4">Dispatcher</dt><dd class="col-sm-8">{{ selectedTrip.dispatcherId }}</dd>
                 </div>
               </dl>

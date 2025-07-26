@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Trip } from '../models/trip.model'; // Assuming you create a model for Trip
+import { Router } from '@angular/router';
 
 // This line is needed to use the global 'bootstrap' object from Bootstrap's JS
 declare var bootstrap: any;
@@ -30,7 +31,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   @ViewChild('courseDetailsModal') modalElement!: ElementRef;
   private courseModal: any;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
     // ✅ Get the user's role from localStorage when the component initializes
@@ -46,7 +47,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
   }
-  
+   viewDriverDetails(id: string): void {
+    this.router.navigate(['/course', id]);
+  }
+  editDriverDetails(id: string): void {
+    this.router.navigate(['/edit-course', id]);
+  }
+  paypage(id: string): void {
+    this.router.navigate(['/pay', id]);
+  }
   fetchTrips(): void {
     this.isLoading = true;
     this.http.get<Trip[]>('https://www.fraiza.xyz/api/trip/all').subscribe({

@@ -1,0 +1,117 @@
+<app-navbar></app-navbar>
+
+<div class="container-fluid py-3">
+  <app-reclamation-stats></app-reclamation-stats>
+
+  <!-- Tabs and Create Button Container -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <ul class="nav nav-tabs" id="reclamationTabs" role="tablist" style="margin-bottom: -1px;">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#en-attente" type="button" role="tab"><i class="fas fa-clock"></i> En Attente</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#en-cours" type="button" role="tab"><i class="fas fa-running"></i> En Cours</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#resolue" type="button" role="tab"><i class="fas fa-check-circle"></i> Résolue</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rejetee" type="button" role="tab"><i class="fas fa-ban"></i> Rejetée</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content" id="reclamationTabsContent">
+    <div class="tab-pane fade show active" id="en-attente" role="tabpanel">
+      <div class="card card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Réclamations en Attente <i class="fas fa-sync-alt ms-2"></i></h4>
+          <form class="d-flex search-form" (submit)="onSearch()">
+            <input class="form-control me-2" type="search" placeholder="Rechercher une réclamation..." aria-label="Search" [(ngModel)]="searchTerm" (input)="onSearch()" name="search">
+            <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
+          </form>
+        </div>
+
+        <div *ngIf="isLoading" class="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Action</th>
+                <th (click)="sortReclamations('dateRecu')">Date <i class="fas" [ngClass]="getSortIcon('dateRecu')"></i></th>
+                <th (click)="sortReclamations('nom')">Nom <i class="fas" [ngClass]="getSortIcon('nom')"></i></th>
+                <th (click)="sortReclamations('email')">Email <i class="fas" [ngClass]="getSortIcon('email')"></i></th>
+                <th (click)="sortReclamations('numerotelephone')">Téléphone <i class="fas" [ngClass]="getSortIcon('numerotelephone')"></i></th>
+                <th (click)="sortReclamations('etat')">État <i class="fas" [ngClass]="getSortIcon('etat')"></i></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="filteredReclamations.length === 0">
+                <td colspan="6">Aucune réclamation trouvée.</td>
+              </tr>
+              <tr *ngFor="let reclamation of filteredReclamations; let i = index">
+                <td class="table-actions">
+                  <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="openModal(reclamation)"><i class="fas fa-eye"></i></button>
+            </td>
+                <td>
+                  {{ reclamation.dateRecu | date:'HH:mm' }}<br>
+                  <strong>{{ reclamation.dateRecu | date:'dd/MM/yyyy' }}</strong><br>
+                  <span class="badge bg-warning text-dark alert-custom">en attente</span>
+                </td>
+                <td>{{ reclamation.nom }}</td>
+                <td>{{ reclamation.email }}</td>
+                <td>{{ reclamation.numerotelephone || 'N/A' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-warning text-dark': reclamation.etat === 'En Attente',
+                    'bg-info': reclamation.etat === 'En Cours',
+                    'bg-success': reclamation.etat === 'Résolue',
+                    'bg-danger': reclamation.etat === 'Rejetée'
+                  }">{{ reclamation.etat }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="en-cours" role="tabpanel"><div class="card card-body">Réclamations en cours content goes here.</div></div>
+    <div class="tab-pane fade" id="resolue" role="tabpanel"><div class="card card-body">Réclamations résolues content goes here.</div></div>
+    <div class="tab-pane fade" id="rejetee" role="tabpanel"><div class="card card-body">Réclamations rejetées content goes here.</div></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="reclamationDetailsModal" #reclamationDetailsModal tabindex="-1" aria-labelledby="reclamationDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content" *ngIf="selectedReclamation">
+        <div class="modal-header">
+          <h5 class="modal-title" id="reclamationDetailsModalLabel">Détails de la réclamation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+            <dl class="row">
+              <div class="col-md-6">
+                <dt class="col-sm-4">Nom</dt><dd class="col-sm-8">{{ selectedReclamation.nom }}</dd>
+                <dt class="col-sm-4">Email</dt><dd class="col-sm-8">{{ selectedReclamation.email }}</dd>
+                <dt class="col-sm-4">Téléphone</dt><dd class="col-sm-8">{{ selectedReclamation.numerotelephone || 'N/A' }}</dd>
+              </div>
+              <div class="col-md-6">
+                <dt class="col-sm-4">Date</dt><dd class="col-sm-8">{{ selectedReclamation.dateRecu | date:'dd/MM/yyyy HH:mm' }}</dd>
+                <dt class="col-sm-4">État</dt><dd class="col-sm-8">{{ selectedReclamation.etat }}</dd>
+                <dt class="col-sm-4">Message</dt><dd class="col-sm-8">{{ selectedReclamation.message }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+          <button type="button" class="btn btn-primary" (click)="updateReclamationStatus(selectedReclamation._id, 'Résolue')">Marquer comme Résolue</button>
+          <button type="button" class="btn btn-danger" (click)="updateReclamationStatus(selectedReclamation._id, 'Rejetée')">Marquer comme Rejetée</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
